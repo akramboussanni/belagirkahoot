@@ -193,6 +193,67 @@ describe("PlayerGamePage", () => {
     expect(link).toHaveAttribute("href", "/join");
   });
 
+  // --- Option grid layout ---
+
+  it("renders 4 buttons for a 4-option question", () => {
+    renderPlayerGame();
+    act(() => capturedOnMessage!(fakeQuestion));
+    expect(screen.getAllByRole("button")).toHaveLength(4);
+  });
+
+  it("renders 3 buttons (no placeholder button) for a 3-option question", () => {
+    renderPlayerGame();
+    act(() =>
+      capturedOnMessage!({
+        type: "question",
+        payload: {
+          question_index: 0,
+          total_questions: 1,
+          question: {
+            id: "q-3opt",
+            text: "Pick one",
+            time_limit: 20,
+            options: [
+              { id: "o-1", text: "A" },
+              { id: "o-2", text: "B" },
+              { id: "o-3", text: "C" },
+            ],
+          },
+        },
+      }),
+    );
+    // Only 3 interactive buttons — the placeholder is a div, not a button
+    expect(screen.getAllByRole("button")).toHaveLength(3);
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(screen.getByText("C")).toBeInTheDocument();
+  });
+
+  it("renders 2 buttons for a 2-option question", () => {
+    renderPlayerGame();
+    act(() =>
+      capturedOnMessage!({
+        type: "question",
+        payload: {
+          question_index: 0,
+          total_questions: 1,
+          question: {
+            id: "q-2opt",
+            text: "True or false?",
+            time_limit: 20,
+            options: [
+              { id: "o-1", text: "True" },
+              { id: "o-2", text: "False" },
+            ],
+          },
+        },
+      }),
+    );
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+    expect(screen.getByText("True")).toBeInTheDocument();
+    expect(screen.getByText("False")).toBeInTheDocument();
+  });
+
   it("fetches player results when podium is shown", async () => {
     const fakeResults: PlayerResults = {
       player_id: PLAYER_ID,
