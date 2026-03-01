@@ -15,10 +15,11 @@ import { PlayerLobbyPage } from "./pages/PlayerLobbyPage";
 import { PlayerGamePage } from "./pages/PlayerGamePage";
 
 const NotFound = () => (
-  <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-    <div className="text-center text-white">
-      <h1 className="text-4xl font-bold">404</h1>
-      <p className="text-gray-400 mt-2">Page not found</p>
+  <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center" style={{ background: "#1a0a2e" }}>
+    <div className="ramadan-pattern" />
+    <div className="relative z-10 text-center text-white">
+      <h1 className="text-6xl font-black" style={{ color: "#f5c842" }}>404</h1>
+      <p className="mt-2" style={{ color: "rgba(255,255,255,0.5)" }}>Page not found</p>
     </div>
   </div>
 );
