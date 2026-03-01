@@ -142,15 +142,32 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) EndSession(w http.ResponseWriter, r *http.Request) {
 	sessionID := chi.URLParam(r, "sessionID")
-	now := time.Now()
 
-	// Fetch the session code so we can notify WebSocket clients.
+	// Fetch current status and code together.
 	var code string
-	_ = h.db.QueryRow(r.Context(),
-		`SELECT code FROM game_sessions WHERE id = $1`, sessionID,
-	).Scan(&code)
+	var status models.GameStatus
+	err := h.db.QueryRow(r.Context(),
+		`SELECT code, status FROM game_sessions WHERE id = $1`, sessionID,
+	).Scan(&code, &status)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "session not found")
+		return
+	}
 
-	_, err := h.db.Exec(r.Context(),
+	// Waiting sessions were never played — hard-delete them instead of leaving
+	// a finished ghost row in history.
+	if status == models.GameStatusWaiting {
+		_, err = h.db.Exec(r.Context(), `DELETE FROM game_sessions WHERE id = $1`, sessionID)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "failed to delete session")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	now := time.Now()
+	_, err = h.db.Exec(r.Context(),
 		`UPDATE game_sessions SET status = $1, ended_at = $2 WHERE id = $3`,
 		models.GameStatusFinished, now, sessionID,
 	)
@@ -160,9 +177,7 @@ func (h *Handler) EndSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Notify all WebSocket clients and clean up Redis.
-	if code != "" {
-		h.engine.EndGame(context.Background(), code)
-	}
+	h.engine.EndGame(context.Background(), code)
 
 	w.WriteHeader(http.StatusNoContent)
 }

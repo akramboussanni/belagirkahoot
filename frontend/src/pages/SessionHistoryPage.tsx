@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { listSessions } from "../api/sessions";
+import { listSessions, endSession } from "../api/sessions";
+import { ConfirmModal } from "../components/ConfirmModal";
 import type { GameStatus } from "../types";
 
 function statusBadge(status: GameStatus) {
@@ -17,13 +19,32 @@ function statusBadge(status: GameStatus) {
 }
 
 export function SessionHistoryPage() {
+  const queryClient = useQueryClient();
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+
   const { data: sessions = [], isLoading, isError } = useQuery({
     queryKey: ["sessions"],
     queryFn: () => listSessions(),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: endSession,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      setPendingDelete(null);
+    },
+  });
+
   return (
     <div>
+      {pendingDelete && (
+        <ConfirmModal
+          title="Delete this session?"
+          message="This cannot be undone."
+          onConfirm={() => deleteMutation.mutate(pendingDelete)}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
       <h2 className="text-2xl font-bold mb-6">Session History</h2>
 
       {isLoading && <p className="text-gray-400">Loading…</p>}
@@ -61,12 +82,21 @@ export function SessionHistoryPage() {
                   <td className="py-3 pr-6">{statusBadge(s.status)}</td>
                   <td className="py-3">
                     {s.status === "waiting" && (
-                      <Link
-                        to={`/admin/host/${s.code}`}
-                        className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition"
-                      >
-                        Resume →
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to={`/admin/host/${s.code}`}
+                          className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition"
+                        >
+                          Resume →
+                        </Link>
+                        <button
+                          onClick={() => setPendingDelete(s.id)}
+                          disabled={deleteMutation.isPending}
+                          className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
