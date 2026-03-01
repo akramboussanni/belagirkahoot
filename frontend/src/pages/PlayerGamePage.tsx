@@ -297,34 +297,50 @@ export function PlayerGamePage() {
             </p>
           </div>
 
-          {/* Options */}
-          <div className="w-full grid grid-cols-2 gap-3 flex-1">
-            {currentQuestion.question.options.map((opt, i) => {
-              const colors = OPTION_COLORS[i % 4];
-              const isSelected = selectedOptionId === opt.id;
-              const isLocked = !!selectedOptionId;
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() =>
-                    handleSelectOption(opt.id, currentQuestion.question.id)
+          {/* Options — pad to 4 when there are 3 so the 2×2 grid stays consistent */}
+          {(() => {
+            const opts = currentQuestion.question.options;
+            const gridItems: (typeof opts[0] | null)[] =
+              opts.length === 3 ? [...opts, null] : opts;
+            return (
+              <div className="w-full grid grid-cols-2 gap-3">
+                {gridItems.map((opt, i) => {
+                  if (!opt) {
+                    return (
+                      <div
+                        key="placeholder"
+                        className="h-[120px] rounded-xl"
+                        aria-hidden="true"
+                      />
+                    );
                   }
-                  disabled={isLocked}
-                  className={`
-                    ${colors.bg} ${!isLocked ? colors.hover : ""}
-                    ${isSelected ? colors.selected : ""}
-                    ${isLocked && !isSelected ? "opacity-50" : ""}
-                    rounded-xl p-4 flex flex-col items-center justify-center gap-2
-                    text-white font-semibold text-sm text-center
-                    transition-all disabled:cursor-not-allowed min-h-[80px]
-                  `}
-                >
-                  <span className="text-2xl font-black opacity-70">{OPTION_SHAPES[i % 4]}</span>
-                  <span>{opt.text}</span>
-                </button>
-              );
-            })}
-          </div>
+                  const colors = OPTION_COLORS[i % 4];
+                  const isSelected = selectedOptionId === opt.id;
+                  const isLocked = !!selectedOptionId;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() =>
+                        handleSelectOption(opt.id, currentQuestion.question.id)
+                      }
+                      disabled={isLocked}
+                      className={`
+                        ${colors.bg} ${!isLocked ? colors.hover : ""}
+                        ${isSelected ? colors.selected : ""}
+                        ${isLocked && !isSelected ? "opacity-50" : ""}
+                        rounded-xl p-4 flex flex-col items-center justify-center gap-2
+                        text-white font-semibold text-sm text-center
+                        transition-all disabled:cursor-not-allowed h-[120px]
+                      `}
+                    >
+                      <span className="text-2xl font-black opacity-70">{OPTION_SHAPES[i % 4]}</span>
+                      <span>{opt.text}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })()}
 
           {selectedOptionId && (
             <div className="mt-4 text-center">
