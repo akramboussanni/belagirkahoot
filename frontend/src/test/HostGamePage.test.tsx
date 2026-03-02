@@ -1,5 +1,4 @@
-import { render, screen, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { HostGamePage } from "../pages/HostGamePage";
@@ -104,18 +103,34 @@ describe("HostGamePage", () => {
     expect(screen.getByRole("button", { name: /next question/i })).toBeInTheDocument();
   });
 
-  it("sends next_question via WS when host clicks Next Question", async () => {
-    renderHostGame();
-    act(() => capturedOnMessage!(fakeQuestion));
-    act(() =>
-      capturedOnMessage!({
-        type: "leaderboard",
-        payload: { entries: [{ player_id: "p1", name: "Alice", score: 800, rank: 1 }] },
-      }),
-    );
-    const btn = screen.getByRole("button", { name: /next question/i });
-    await userEvent.click(btn);
-    expect(mockSend).toHaveBeenCalledWith({ type: "next_question", payload: {} });
+  it("shows arc transition then sends next_question after animation", () => {
+    vi.useFakeTimers();
+    try {
+      renderHostGame();
+      act(() => capturedOnMessage!(fakeQuestion));
+      act(() =>
+        capturedOnMessage!({
+          type: "leaderboard",
+          payload: { entries: [{ player_id: "p1", name: "Alice", score: 800, rank: 1 }] },
+        }),
+      );
+
+      const btn = screen.getByRole("button", { name: /next question/i });
+      act(() => { fireEvent.click(btn); });
+
+      // Arc transition is now showing — prayer labels visible, send not yet called
+      expect(screen.getByText("Fajr")).toBeInTheDocument();
+      expect(mockSend).not.toHaveBeenCalled();
+
+      // Advance past animation
+      act(() => {
+        vi.advanceTimersByTime(1600);
+      });
+
+      expect(mockSend).toHaveBeenCalledWith({ type: "next_question", payload: {} });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("updates answered count from answer_count message", () => {
