@@ -85,23 +85,35 @@ describe("PlayerGamePage", () => {
     expect(screen.getByRole("button", { name: /4/i })).toBeInTheDocument();
   });
 
-  it("sends answer_submitted and locks options on selection", async () => {
+  it("sends answer_submitted and replaces options with locked-in waiting state", async () => {
     renderPlayerGame();
     act(() => capturedOnMessage!(fakeQuestion));
 
-    const btn = screen.getByRole("button", { name: /4/i });
-    await userEvent.click(btn);
+    await userEvent.click(screen.getByRole("button", { name: /4/i }));
 
     expect(mockSend).toHaveBeenCalledWith({
       type: "answer_submitted",
       payload: { question_id: "q-1", option_id: "o-2" },
     });
-    expect(screen.getByText(/answer locked in/i)).toBeInTheDocument();
 
-    // Clicking again should not send another message.
-    mockSend.mockClear();
-    await userEvent.click(btn);
-    expect(mockSend).not.toHaveBeenCalled();
+    // Option buttons are replaced by the locked-in waiting card
+    expect(screen.getByText(/answer locked in/i)).toBeInTheDocument();
+    expect(screen.getByText(/waiting for others/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("does not show correct/incorrect feedback before answer_reveal message", async () => {
+    renderPlayerGame();
+    act(() => capturedOnMessage!(fakeQuestion));
+
+    await userEvent.click(screen.getByRole("button", { name: /4/i }));
+
+    // No reveal feedback — phase is still "question"
+    expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
+    expect(screen.queryByText("Incorrect")).not.toBeInTheDocument();
+    // Neutral waiting state shown
+    expect(screen.getByText(/answer locked in/i)).toBeInTheDocument();
+    expect(screen.getByText(/waiting for others/i)).toBeInTheDocument();
   });
 
   it("shows reveal with correct feedback for this player", () => {
