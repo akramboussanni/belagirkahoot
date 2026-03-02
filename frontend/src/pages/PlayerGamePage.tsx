@@ -303,6 +303,7 @@ export function PlayerGamePage() {
   // ── Question ─────────────────────────────────────────────────────────────
   if (phase === "question" && currentQuestion) {
     const opts = currentQuestion.question.options;
+    const selectedOptIndex = opts.findIndex(o => o.id === selectedOptionId);
 
     return (
       <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
@@ -325,46 +326,80 @@ export function PlayerGamePage() {
             <h2 className="text-xl font-bold text-white leading-snug">{currentQuestion.question.text}</h2>
           </motion.div>
 
-          {/* Answer tiles */}
-          <div className="flex flex-col gap-3">
-            {opts.map((opt, i) => {
-              const color = OPTION_COLORS[i % 4];
-              const isSelected = selectedOptionId === opt.id;
-              const isLocked = !!selectedOptionId;
-              return (
-                <motion.button key={opt.id}
-                  onClick={() => handleSelectOption(opt.id, currentQuestion.question.id)}
-                  disabled={isLocked}
-                  className="relative px-4 py-3 rounded-2xl text-left overflow-hidden group disabled:cursor-not-allowed"
-                  style={{
-                    background: `linear-gradient(135deg, ${color}dd 0%, ${color}bb 100%)`,
-                    boxShadow: isSelected ? `0 8px 30px ${color}80, 0 0 0 3px ${color}` : `0 4px 15px ${color}40`,
-                    opacity: isLocked && !isSelected ? 0.5 : 1,
-                  }}
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: isLocked && !isSelected ? 0.5 : 1, x: 0 }}
-                  transition={{ delay: 0.2 + i * 0.08 }}
-                  whileHover={!isLocked ? { scale: 1.02 } : {}}
-                  whileTap={!isLocked ? { scale: 0.98 } : {}}>
-                  {/* Shine on hover */}
-                  <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20"
-                    initial={{ x: "-100%" }} whileHover={{ x: "100%" }} transition={{ duration: 0.6 }} />
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0"
-                      style={{ background: "rgba(255,255,255,0.25)", color: "white" }}>
-                      {String.fromCharCode(65 + i)}
-                    </div>
-                    <p className="text-white font-medium leading-tight">{opt.text}</p>
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
+          {/* Answer tiles — hidden once an answer is locked in */}
+          {selectedOptionId ? (
+            <motion.div
+              className="flex flex-col items-center gap-6 py-4"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              {/* Neutral locked-in card — no correct/incorrect colours */}
+              <div className="w-full rounded-3xl p-8 text-center"
+                style={{
+                  background: "rgba(245,200,66,0.08)",
+                  border: "2px solid rgba(245,200,66,0.35)",
+                  boxShadow: "0 0 40px rgba(245,200,66,0.1)",
+                }}>
+                <motion.div
+                  className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: "rgba(245,200,66,0.15)", border: "2px solid rgba(245,200,66,0.4)" }}
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Check className="w-8 h-8" style={{ color: "#f5c842" }} />
+                </motion.div>
+                <p className="text-lg font-bold text-white mb-2">Answer locked in!</p>
+                {selectedOptIndex >= 0 && (
+                  <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    {String.fromCharCode(65 + selectedOptIndex)}: {opts[selectedOptIndex].text}
+                  </p>
+                )}
+              </div>
 
-          {selectedOptionId && (
-            <motion.div className="mt-4 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Answer locked in! Waiting for others…</p>
+              {/* Pulsing waiting indicator */}
+              <div className="flex items-center gap-2">
+                {[0, 1, 2].map(i => (
+                  <motion.div key={i} className="w-2 h-2 rounded-full"
+                    style={{ background: "rgba(245,200,66,0.6)" }}
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: i * 0.3 }}
+                  />
+                ))}
+                <p className="text-sm ml-1" style={{ color: "rgba(255,255,255,0.5)" }}>Waiting for others…</p>
+              </div>
             </motion.div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {opts.map((opt, i) => {
+                const color = OPTION_COLORS[i % 4];
+                return (
+                  <motion.button key={opt.id}
+                    onClick={() => handleSelectOption(opt.id, currentQuestion.question.id)}
+                    className="relative px-4 py-3 rounded-2xl text-left overflow-hidden group"
+                    style={{
+                      background: `linear-gradient(135deg, ${color}dd 0%, ${color}bb 100%)`,
+                      boxShadow: `0 4px 15px ${color}40`,
+                    }}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + i * 0.08 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}>
+                    {/* Shine on hover */}
+                    <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20"
+                      initial={{ x: "-100%" }} whileHover={{ x: "100%" }} transition={{ duration: 0.6 }} />
+                    <div className="relative z-10 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0"
+                        style={{ background: "rgba(255,255,255,0.25)", color: "white" }}>
+                        {String.fromCharCode(65 + i)}
+                      </div>
+                      <p className="text-white font-medium leading-tight">{opt.text}</p>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
