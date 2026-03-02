@@ -5,9 +5,10 @@ interface ConfirmModalProps {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
+  confirmLabel?: string;
 }
 
-export function ConfirmModal({ title, message, onConfirm, onCancel }: ConfirmModalProps) {
+export function ConfirmModal({ title, message, onConfirm, onCancel, confirmLabel = "Delete" }: ConfirmModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -46,7 +47,7 @@ export function ConfirmModal({ title, message, onConfirm, onCancel }: ConfirmMod
             style={{ background: "rgba(244,67,54,0.2)", color: "#f44336", border: "1px solid rgba(244,67,54,0.4)" }}
             whileHover={{ scale: 1.02, background: "rgba(244,67,54,0.3)" }} whileTap={{ scale: 0.98 }}
           >
-            Delete
+            {confirmLabel}
           </motion.button>
         </div>
       </motion.div>

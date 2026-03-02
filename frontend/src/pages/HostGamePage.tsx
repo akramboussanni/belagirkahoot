@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ChevronRight, Users } from "lucide-react";
+import { ChevronRight, Users, LogOut } from "lucide-react";
 import { CrescentIcon } from "../components/icons";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
+import { endSession } from "../api/sessions";
 import { LeaderboardDisplay } from "../components/LeaderboardDisplay";
 import { PodiumScreen } from "../components/PodiumScreen";
+import { ConfirmModal } from "../components/ConfirmModal";
 import type { WsMessage, LeaderboardEntry, PodiumEntry } from "../types";
 
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8081";
@@ -41,6 +43,7 @@ const OPTION_LETTERS = ["A", "B", "C", "D"];
 export function HostGamePage() {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const activeSession = useGameStore((s) => s.activeSession);
   const clearActiveSession = useGameStore((s) => s.clearActiveSession);
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export function HostGamePage() {
   const [wsReady, setWsReady] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [timeLimit, setTimeLimit] = useState(20);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   useEffect(() => {
     if (phase !== "question" || timeLeft <= 0) return;
@@ -117,6 +121,14 @@ export function HostGamePage() {
 
   const handleNextQuestion = () => send({ type: "next_question", payload: {} });
   const handleEndGame = () => navigate("/admin");
+
+  async function handleForceEndGame() {
+    if (activeSession) {
+      try { await endSession(activeSession.sessionId); } catch { /* ignore */ }
+      clearActiveSession();
+    }
+    navigate("/admin", { replace: true });
+  }
 
   if (phase === "waiting") {
     return (
@@ -177,6 +189,16 @@ export function HostGamePage() {
     <div className="min-h-screen w-full relative overflow-hidden flex flex-col" style={{ background: "#1a0a2e" }}>
       <div className="ramadan-pattern" />
 
+      {showEndConfirm && (
+        <ConfirmModal
+          title="End the game?"
+          message="This will end the session for all players. This cannot be undone."
+          confirmLabel="End Game"
+          onConfirm={handleForceEndGame}
+          onCancel={() => setShowEndConfirm(false)}
+        />
+      )}
+
       {/* Top bar */}
       <div className="relative z-20 px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between"
         style={{ background: "linear-gradient(180deg, rgba(30,15,50,0.95) 0%, rgba(20,10,40,0.9) 100%)", borderBottom: "1px solid rgba(245,200,66,0.2)" }}>
@@ -190,11 +212,19 @@ export function HostGamePage() {
             Question <span className="font-bold text-white">{currentQuestion.question_index + 1}</span> / {currentQuestion.total_questions}
           </div>
         )}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <Users className="w-4 h-4" style={{ color: "#2196f3" }} />
-          <span className="font-bold text-white">{answeredCount}</span>
-          <span className="hidden sm:inline text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>answered</span>
-          <span className={`ml-1 sm:ml-3 w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5">
+            <Users className="w-4 h-4" style={{ color: "#2196f3" }} />
+            <span className="font-bold text-white">{answeredCount}</span>
+            <span className="hidden sm:inline text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>answered</span>
+            <span className={`ml-1 w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
+          </div>
+          <motion.button onClick={() => setShowEndConfirm(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold"
+            style={{ background: "rgba(244,67,54,0.15)", color: "#f44336", border: "1px solid rgba(244,67,54,0.3)" }}>
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">End Game</span>
+          </motion.button>
         </div>
       </div>
 
