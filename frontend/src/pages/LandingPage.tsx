@@ -451,62 +451,152 @@ export function LandingPage() {
             fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)",
             color: "#faf3e0", letterSpacing: "-0.02em", lineHeight: 1.1,
           }}>
-            Made for the season.<br />
-            <span style={{ color: "#f5c842" }}>Built for competition.</span>
+            Everything Kahoot charges for.<br />
+            <span style={{ color: "#f5c842" }}>Free. Forever.</span>
           </h2>
         </motion.div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+        {/* Kahoot comparison hero card */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7 }}
+          style={{
+            marginBottom: 32,
+            borderRadius: 20,
+            overflow: "hidden",
+            border: "1px solid rgba(245,200,66,0.15)",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+          }}
+        >
+          {/* Kahoot column */}
+          <div style={{
+            padding: "40px 44px",
+            background: "rgba(255,255,255,0.02)",
+            borderRight: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            <p style={{
+              fontFamily: "'Poppins', sans-serif", fontSize: 11,
+              letterSpacing: "0.25em", fontWeight: 700, color: "rgba(250,243,224,0.3)",
+              textTransform: "uppercase", marginBottom: 20,
+            }}>
+              Kahoot
+            </p>
+            {[
+              "Up to 10 players free",
+              "Paid plan for more players",
+              "No Ramadan theme",
+              "Generic quiz experience",
+            ].map((item) => (
+              <div key={item} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="7.5" stroke="rgba(244,67,54,0.4)" />
+                  <path d="M5 5l6 6M11 5l-6 6" stroke="#f44336" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                <span style={{
+                  fontFamily: "'Poppins', sans-serif", fontSize: 14,
+                  color: "rgba(250,243,224,0.4)", fontWeight: 400,
+                }}>
+                  {item}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Iftaroot column */}
+          <div style={{
+            padding: "40px 44px",
+            background: "rgba(245,200,66,0.04)",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 2,
+              background: "linear-gradient(to right, #f5c842, #ff6b35)",
+            }} />
+            <p style={{
+              fontFamily: "'Poppins', sans-serif", fontSize: 11,
+              letterSpacing: "0.25em", fontWeight: 700, color: "#f5c842",
+              textTransform: "uppercase", marginBottom: 20,
+            }}>
+              Iftaroot
+            </p>
+            {[
+              "Unlimited players, always free",
+              "No account needed to play",
+              "Built for Ramadan",
+              "Real-time, speed-scored competition",
+            ].map((item) => (
+              <div key={item} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="7.5" stroke="rgba(76,175,80,0.5)" />
+                  <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#4caf50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span style={{
+                  fontFamily: "'Poppins', sans-serif", fontSize: 14,
+                  color: "rgba(250,243,224,0.85)", fontWeight: 500,
+                }}>
+                  {item}
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Feature strip — 3 compact items */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "rgba(255,255,255,0.05)", borderRadius: 16, overflow: "hidden" }}>
           {[
             {
-              icon: "⚡",
-              title: "Real-Time Multiplayer",
-              body: "Players join with a 6-digit code. Answers, scores, and leaderboards update live via WebSockets — no refreshing.",
-              accent: "#f5c842",
+              label: "Real-Time",
+              title: "Live leaderboards, zero lag",
+              body: "WebSocket-powered. Every answer, score update, and reveal happens instantly across all connected players.",
             },
             {
-              icon: "🌙",
-              title: "Ramadan-Themed",
-              body: "Prayer arc transitions, golden design tokens, crescent iconography — every detail honours the spirit of the month.",
-              accent: "#ff6b35",
+              label: "Ramadan-Themed",
+              title: "Designed for the occasion",
+              body: "Prayer arc transitions, crescent moon motifs, and golden design tokens — built with intention, not as an afterthought.",
             },
             {
-              icon: "🏆",
-              title: "Time-Pressured Scoring",
-              body: "Faster answers earn more points. Speed and knowledge both matter. The leaderboard shifts after every question.",
-              accent: "#4caf50",
+              label: "Speed Scoring",
+              title: "Fast answers win more",
+              body: "Points scale with response time. Know the answer AND be quick. Every question reshuffles the leaderboard.",
             },
           ].map((f, i) => (
             <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 30 }}
+              key={f.label}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, delay: i * 0.12 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
               style={{
-                padding: "36px 32px",
-                borderRadius: 20,
-                background: "rgba(255,255,255,0.03)",
-                border: `1px solid rgba(${f.accent === "#f5c842" ? "245,200,66" : f.accent === "#ff6b35" ? "255,107,53" : "76,175,80"},0.2)`,
-                backdropFilter: "blur(12px)",
-                position: "relative",
-                overflow: "hidden",
+                padding: "32px 28px",
+                background: "rgba(6,9,26,0.95)",
               }}
             >
-              {/* Corner ornament */}
-              <div style={{ position: "absolute", top: 16, right: 16, opacity: 0.15 }}>
-                <StarOrnament size={28} color={f.accent} opacity={1} />
-              </div>
-              <div style={{ fontSize: 36, marginBottom: 20, lineHeight: 1 }}>{f.icon}</div>
+              <span style={{
+                display: "inline-block",
+                fontFamily: "'Poppins', sans-serif", fontSize: 10,
+                letterSpacing: "0.25em", fontWeight: 700,
+                color: "#f5c842", textTransform: "uppercase",
+                marginBottom: 12,
+                padding: "3px 10px",
+                border: "1px solid rgba(245,200,66,0.25)",
+                borderRadius: 4,
+              }}>
+                {f.label}
+              </span>
               <h3 style={{
                 fontFamily: "'Poppins', sans-serif", fontWeight: 700,
-                fontSize: 18, color: "#faf3e0", marginBottom: 12, letterSpacing: "-0.01em",
+                fontSize: 16, color: "#faf3e0", marginBottom: 10,
+                letterSpacing: "-0.01em", lineHeight: 1.3,
               }}>
                 {f.title}
               </h3>
               <p style={{
-                fontFamily: "'Poppins', sans-serif", fontSize: 14,
-                color: "rgba(250,243,224,0.55)", lineHeight: 1.75,
+                fontFamily: "'Poppins', sans-serif", fontSize: 13,
+                color: "rgba(250,243,224,0.45)", lineHeight: 1.7,
               }}>
                 {f.body}
               </p>
