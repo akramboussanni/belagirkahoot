@@ -325,8 +325,8 @@ export function PlayerGamePage() {
             <h2 className="text-xl font-bold text-white leading-snug">{currentQuestion.question.text}</h2>
           </motion.div>
 
-          {/* Answer tiles — 1-column list matching Figma */}
-          <div className="grid grid-cols-1 gap-3 flex-1">
+          {/* Answer tiles */}
+          <div className="flex flex-col gap-3">
             {opts.map((opt, i) => {
               const color = OPTION_COLORS[i % 4];
               const isSelected = selectedOptionId === opt.id;
@@ -335,13 +335,11 @@ export function PlayerGamePage() {
                 <motion.button key={opt.id}
                   onClick={() => handleSelectOption(opt.id, currentQuestion.question.id)}
                   disabled={isLocked}
-                  className="relative p-4 rounded-2xl text-left overflow-hidden group disabled:cursor-not-allowed"
+                  className="relative px-4 py-3 rounded-2xl text-left overflow-hidden group disabled:cursor-not-allowed"
                   style={{
                     background: `linear-gradient(135deg, ${color}dd 0%, ${color}bb 100%)`,
                     boxShadow: isSelected ? `0 8px 30px ${color}80, 0 0 0 3px ${color}` : `0 4px 15px ${color}40`,
                     opacity: isLocked && !isSelected ? 0.5 : 1,
-                    transform: isSelected ? "scale(1.02)" : "scale(1)",
-                    transition: "transform 0.15s, opacity 0.15s",
                   }}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: isLocked && !isSelected ? 0.5 : 1, x: 0 }}
@@ -351,7 +349,11 @@ export function PlayerGamePage() {
                   {/* Shine on hover */}
                   <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20"
                     initial={{ x: "-100%" }} whileHover={{ x: "100%" }} transition={{ duration: 0.6 }} />
-                  <div className="relative z-10 flex items-center gap-4">
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0"
+                      style={{ background: "rgba(255,255,255,0.25)", color: "white" }}>
+                      {String.fromCharCode(65 + i)}
+                    </div>
                     <p className="text-white font-medium leading-tight">{opt.text}</p>
                   </div>
                 </motion.button>
