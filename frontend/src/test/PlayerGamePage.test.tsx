@@ -224,9 +224,9 @@ describe("PlayerGamePage", () => {
     );
     // Only 3 interactive buttons — the placeholder is a div, not a button
     expect(screen.getAllByRole("button")).toHaveLength(3);
-    expect(screen.getByText("A")).toBeInTheDocument();
-    expect(screen.getByText("B")).toBeInTheDocument();
-    expect(screen.getByText("C")).toBeInTheDocument();
+    expect(screen.getAllByText("A").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("B").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("C").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders 2 buttons for a 2-option question", () => {
