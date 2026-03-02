@@ -9,6 +9,7 @@ import { endSession } from "../api/sessions";
 import { LeaderboardDisplay } from "../components/LeaderboardDisplay";
 import { PodiumScreen } from "../components/PodiumScreen";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { PrayerArcTransition } from "../components/PrayerArcTransition";
 import type { WsMessage, LeaderboardEntry, PodiumEntry } from "../types";
 
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8081";
@@ -35,7 +36,7 @@ interface AnswerRevealPayload {
   scores: Record<string, { is_correct: boolean; points: number; total_score: number }>;
 }
 
-type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "podium";
+type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "arc_transition" | "podium";
 
 const OPTION_COLORS = ["#4caf50", "#2196f3", "#ff6b35", "#f44336"];
 const OPTION_LETTERS = ["A", "B", "C", "D"];
@@ -123,7 +124,7 @@ export function HostGamePage() {
     enabled: !!code,
   });
 
-  const handleNextQuestion = () => send({ type: "next_question", payload: {} });
+  const handleNextQuestion = () => setPhase("arc_transition");
   const handleEndGame = () => navigate("/admin");
 
   async function handleForceEndGame() {
@@ -156,6 +157,14 @@ export function HostGamePage() {
 
   if (phase === "podium") {
     return <PodiumScreen entries={podium} onEnd={handleEndGame} endLabel="Back to Dashboard" />;
+  }
+
+  if (phase === "arc_transition") {
+    return (
+      <PrayerArcTransition
+        onComplete={() => send({ type: "next_question", payload: {} })}
+      />
+    );
   }
 
   if (phase === "leaderboard") {
