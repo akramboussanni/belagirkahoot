@@ -689,14 +689,32 @@ export function LandingPage() {
         {/* Footer line */}
         <div style={{ marginTop: 80 }}>
           <GeoDivider />
-          <p style={{
-            marginTop: 28,
-            fontFamily: "'Poppins', sans-serif",
-            fontSize: 12, color: "rgba(250,243,224,0.2)",
-            letterSpacing: "0.1em",
-          }}>
-            IFTAROOT · RAMADAN 2026 · OPEN SOURCE
-          </p>
+          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            <p style={{
+              fontFamily: "'Poppins', sans-serif",
+              fontSize: 12, color: "rgba(250,243,224,0.2)",
+              letterSpacing: "0.1em",
+            }}>
+              Built by{" "}
+              <a
+                href="https://github.com/HassanA01"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "rgba(245,200,66,0.5)", textDecoration: "none", fontWeight: 600 }}
+                onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = "#f5c842"; }}
+                onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = "rgba(245,200,66,0.5)"; }}
+              >
+                HassanA01
+              </a>
+            </p>
+            <p style={{
+              fontFamily: "'Poppins', sans-serif",
+              fontSize: 11, color: "rgba(250,243,224,0.15)",
+              letterSpacing: "0.08em",
+            }}>
+              © {new Date().getFullYear()} Iftaroot. All rights reserved.
+            </p>
+          </div>
         </div>
       </section>
     </div>
