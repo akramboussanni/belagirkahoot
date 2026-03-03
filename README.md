@@ -21,15 +21,15 @@
   <a href="#quick-start">Quick Start</a> ·
   <a href="#tech-stack">Tech Stack</a> ·
   <a href="#self-hosting">Self-Hosting</a> ·
+  <a href="docs/architecture.md">Architecture</a> ·
   <a href="#contributing">Contributing</a> ·
   <a href="#license">License</a>
 </p>
 
 ---
 
-<!-- TODO: Replace with a screenshot or demo video -->
 <p align="center">
-  <em>Demo video coming soon.</em>
+  <video src="https://github.com/user-attachments/assets/c1154945-29a0-4cb9-add6-bce1a2a1cecd" width="800" controls></video>
 </p>
 
 ---
