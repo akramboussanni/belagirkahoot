@@ -11,6 +11,9 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 )
 
+// maxAIQuestions is the hard cap on AI-generated question count.
+const maxAIQuestions = 10
+
 type generateQuizRequest struct {
 	Topic             string `json:"topic"`
 	QuestionCount     int    `json:"question_count"`
@@ -38,8 +41,8 @@ func (h *Handler) GenerateQuiz(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "topic is required")
 		return
 	}
-	if req.QuestionCount < 1 || req.QuestionCount > 20 {
-		writeError(w, http.StatusBadRequest, "question_count must be between 1 and 20")
+	if req.QuestionCount < 1 || req.QuestionCount > maxAIQuestions {
+		writeError(w, http.StatusBadRequest, "question_count must be between 1 and "+strconv.Itoa(maxAIQuestions))
 		return
 	}
 

@@ -107,7 +107,7 @@ export function GenerateQuizModal({ onClose, onGenerated }: Props) {
                 <input
                   type="number"
                   min={1}
-                  max={20}
+                  max={10}
                   value={count}
                   onChange={(e) => setCount(Number(e.target.value))}
                   className="w-full rounded-xl px-4 py-3 text-sm outline-none transition"
