@@ -1,6 +1,7 @@
 # Go
 backend/bin/
 backend/tmp/
+backend/simulate
 *.exe
 *.exe~
 *.dll
