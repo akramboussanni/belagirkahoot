@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -11,20 +13,27 @@ import (
 )
 
 type Handler struct {
-	db     *pgxpool.Pool
-	redis  *redis.Client
-	hub    *hub.Hub
-	engine *game.Engine
-	config *config.Config
+	db              *pgxpool.Pool
+	redis           *redis.Client
+	hub             *hub.Hub
+	engine          *game.Engine
+	config          *config.Config
+	anthropicClient *anthropic.Client
 }
 
 func New(db *pgxpool.Pool, redisClient *redis.Client, gameHub *hub.Hub, cfg *config.Config) *Handler {
+	var ac *anthropic.Client
+	if cfg.AnthropicAPIKey != "" {
+		c := anthropic.NewClient(option.WithAPIKey(cfg.AnthropicAPIKey))
+		ac = &c
+	}
 	return &Handler{
-		db:     db,
-		redis:  redisClient,
-		hub:    gameHub,
-		engine: game.NewEngine(gameHub, db, redisClient),
-		config: cfg,
+		db:              db,
+		redis:           redisClient,
+		hub:             gameHub,
+		engine:          game.NewEngine(gameHub, db, redisClient),
+		config:          cfg,
+		anthropicClient: ac,
 	}
 }
 
@@ -39,6 +48,7 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 			r.Use(h.RequireAuth)
 			r.Get("/quizzes", h.ListQuizzes)
 			r.Post("/quizzes", h.CreateQuiz)
+			r.Post("/quizzes/generate", h.GenerateQuiz)
 			r.Get("/quizzes/{quizID}", h.GetQuiz)
 			r.Put("/quizzes/{quizID}", h.UpdateQuiz)
 			r.Delete("/quizzes/{quizID}", h.DeleteQuiz)
