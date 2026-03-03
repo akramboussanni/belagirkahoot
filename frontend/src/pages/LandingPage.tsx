@@ -489,7 +489,7 @@ export function LandingPage() {
               "Paid plan for more players",
               "No Ramadan theme",
               "Generic quiz experience",
-              "Manual quiz creation only",
+              "AI quiz generation — paid only",
             ].map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -529,7 +529,7 @@ export function LandingPage() {
               "No account needed to play",
               "Built for Ramadan",
               "Real-time, speed-scored competition",
-              "AI-powered quiz generation",
+              "AI-powered quiz generation — free",
             ].map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
