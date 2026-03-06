@@ -20,23 +20,23 @@ export function RegisterPage() {
     setError(null);
 
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError("Les mots de passe ne correspondent pas.");
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
 
     setLoading(true);
     try {
-      const { token, admin } = await register(email, password);
-      setAuth(token, admin);
-      navigate("/admin", { replace: true });
+      const { token, host } = await register(email, password);
+      setAuth(token, host);
+      navigate("/host", { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-        "Registration failed. Please try again.";
+        "Échec de l'inscription. Veuillez réessayer.";
       setError(message);
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ export function RegisterPage() {
         {[{ delay: 0, rot: [-5, 5, -5] as [number, number, number] }, { delay: 0.5, rot: [5, -5, 5] as [number, number, number] }].map((l, i) => (
           <motion.div key={i} animate={{ y: [0, -12, 0], rotate: l.rot }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: l.delay }}>
-            
+
           </motion.div>
         ))}
       </div>
@@ -63,13 +63,13 @@ export function RegisterPage() {
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="relative">
               <img src="/favicon.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" />
-              
+
             </div>
             <span className="text-3xl font-black" style={{ color: "#0136fe", textShadow: "0 0 20px rgba(1,54,254,0.4)" }}>
               {import.meta.env.VITE_APP_NAME || 'Kahoot'}
             </span>
           </div>
-          <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Create an admin account</p>
+          <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Créer un compte hôte</p>
         </motion.div>
 
         {/* Card */}
@@ -106,13 +106,13 @@ export function RegisterPage() {
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
                 onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
                 onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                placeholder="admin@example.com"
+                placeholder="hôte@exemple.com"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
-                Password <span className="font-normal" style={{ color: "rgba(255,255,255,0.35)" }}>(min. 8 chars)</span>
+                Mot de passe <span className="font-normal" style={{ color: "rgba(255,255,255,0.35)" }}>(min. 8 caractères)</span>
               </label>
               <input
                 type="password"
@@ -131,7 +131,7 @@ export function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
-                Confirm password
+                Confirmer le mot de passe
               </label>
               <input
                 type="password"
@@ -157,14 +157,14 @@ export function RegisterPage() {
               }}
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}>
-              {loading ? "Creating account…" : "Create account"}
+              {loading ? "Création du compte…" : "Créer un compte"}
             </motion.button>
           </form>
 
           <p className="text-center text-sm pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Already have an account?{" "}
+            Déjà un compte ?{" "}
             <Link to="/login" className="font-semibold transition" style={{ color: "#0136fe" }}>
-              Sign in
+              Se connecter
             </Link>
           </p>
         </motion.div>

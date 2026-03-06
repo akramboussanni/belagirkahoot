@@ -18,9 +18,9 @@ function renderLobby(code = "ABC123") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={[`/admin/lobby/${code}`]}>
+      <MemoryRouter initialEntries={[`/host/lobby/${code}`]}>
         <Routes>
-          <Route path="/admin/lobby/:code" element={<HostLobbyPage />} />
+          <Route path="/host/lobby/:code" element={<HostLobbyPage />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,

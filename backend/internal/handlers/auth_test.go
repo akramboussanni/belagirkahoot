@@ -85,7 +85,7 @@ func TestLogin_Validation(t *testing.T) {
 
 func TestGenerateToken(t *testing.T) {
 	h := newTestHandler()
-	tok, err := h.generateToken("test-admin-id")
+	tok, err := h.generateToken("test-host-id")
 	if err != nil {
 		t.Fatalf("generateToken failed: %v", err)
 	}

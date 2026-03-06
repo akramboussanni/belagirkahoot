@@ -44,8 +44,8 @@ function PodiumBlock({
   const avatarGrad = rank === 1
     ? "linear-gradient(135deg, #0136fe 0%, #ffd700 100%)"
     : rank === 2
-    ? "linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%)"
-    : "linear-gradient(135deg, #cd7f32 0%, #d4a574 100%)";
+      ? "linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%)"
+      : "linear-gradient(135deg, #cd7f32 0%, #d4a574 100%)";
   const avatarColor = rank <= 2 ? "#b7f700" : "white";
   const avatarSize = rank === 1 ? "w-24 h-24 text-3xl" : "w-20 h-20 text-2xl";
 
@@ -87,17 +87,17 @@ function PodiumBlock({
           />
         )}
         {rank === 1 && <img src="/favicon.png" alt="Logo" className="w-12 h-12 mx-auto object-contain drop-shadow-md" />}
-        <p className="text-[#0136fe] font-bold text-xs truncate mb-1">{entry.name}{isSelf ? " (you)" : ""}</p>
+        <p className="text-[#0136fe] font-bold text-xs truncate mb-1">{entry.name}{isSelf ? " (vous)" : ""}</p>
         <p className={`font-black ${rank === 1 ? "text-3xl" : "text-2xl"}`} style={{ color: borderColor }}>{entry.score}</p>
         <p className="text-xs mt-1" style={{ color: "rgba(1,54,254,0.8)" }}>
-          {rank === 1 ? "CHAMPION!" : rank === 2 ? "2nd Place" : "3rd Place"}
+          {rank === 1 ? "CHAMPION !" : rank === 2 ? "2ème Place" : "3ème Place"}
         </p>
       </div>
     </motion.div>
   );
 }
 
-export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Dashboard", playerResults }: Props) {
+export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Retour au tableau de bord", playerResults }: Props) {
   const top3 = entries.slice(0, 3);
   const rest = entries.slice(3);
   const confetti = useMemo(() => generateConfetti(30), []);
@@ -125,7 +125,7 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
           {[{ delay: 0, rot: [-5, 5, -5] }, { delay: 0.5, rot: [5, -5, 5] }].map((l, i) => (
             <motion.div key={i} animate={{ y: [0, -15, 0], rotate: l.rot as [number, number, number] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: l.delay }}>
-              
+
             </motion.div>
           ))}
         </div>
@@ -139,9 +139,9 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
             <Sparkles className="w-8 h-8" style={{ color: "#0136fe" }} />
           </motion.div>
           <h1 className="text-4xl font-black mb-2" style={{ color: "#0136fe", textShadow: "0 0 20px rgba(1,54,254,0.6)" }}>
-            Game Over!
+            Partie terminée !
           </h1>
-          <p style={{ color: "rgba(1,54,254,0.8)" }}>May your Iftaar be blessed ✨</p>
+          <p style={{ color: "rgba(1,54,254,0.8)" }}>Que votre Iftar soit béni ✨</p>
         </motion.div>
 
         {/* Podium — order: 2nd, 1st, 3rd */}
@@ -167,9 +167,9 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
           style={{ background: "rgba(1,54,254, 0.1)", border: "1px solid rgba(1,54,254, 0.3)" }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
           {isChampion ? (
-            <p className="font-bold text-lg" style={{ color: "#0136fe" }}>🎉 Congratulations, Champion! 🎉</p>
+            <p className="font-bold text-lg" style={{ color: "#0136fe" }}>🎉 Félicitations, Champion ! 🎉</p>
           ) : (
-            <p className="text-[#0136fe]">Great job! Thanks for playing with us 💫</p>
+            <p className="text-[#0136fe]">Bon travail ! Merci d'avoir joué avec nous 💫</p>
           )}
         </motion.div>
 
@@ -178,9 +178,9 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
           <motion.div className="mb-6 p-5 rounded-2xl text-center"
             style={{ background: "rgba(1,54,254, 0.1)", border: "2px solid rgba(1,54,254, 0.3)" }}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}>
-            <p className="text-sm mb-1" style={{ color: "rgba(1,54,254,0.8)" }}>Your final score</p>
+            <p className="text-sm mb-1" style={{ color: "rgba(1,54,254,0.8)" }}>Votre score final</p>
             <p className="text-4xl font-black" style={{ color: "#0136fe" }}>{myEntry.score}</p>
-            <p className="text-sm mt-1" style={{ color: "rgba(1,54,254,0.8)" }}>Rank #{myEntry.rank}</p>
+            <p className="text-sm mt-1" style={{ color: "rgba(1,54,254,0.8)" }}>Rang #{myEntry.rank}</p>
           </motion.div>
         )}
 
@@ -196,7 +196,7 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
                     border: `2px solid ${isSelf ? "rgba(1,54,254,0.4)" : "transparent"}`,
                   }}>
                   <span className="w-8 text-center font-bold shrink-0" style={{ color: "rgba(1,54,254,0.8)" }}>#{entry.rank}</span>
-                  <span className="font-medium text-[#0136fe] flex-1 truncate">{entry.name}{isSelf && <span className="ml-2 text-xs" style={{ color: "#0136fe" }}>(you)</span>}</span>
+                  <span className="font-medium text-[#0136fe] flex-1 truncate">{entry.name}{isSelf && <span className="ml-2 text-xs" style={{ color: "#0136fe" }}>(vous)</span>}</span>
                   <span className="font-bold tabular-nums shrink-0" style={{ color: "#0136fe" }}>{entry.score}</span>
                 </div>
               );
@@ -219,41 +219,41 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
                   color: "#0136fe",
                 }}
               >
-                See how you scored
+                Voir vos résultats
               </motion.button>
             )}
             {showBreakdown && (
-                <motion.div
-                  data-testid="player-results-breakdown"
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                >
-                  <h2 className="text-lg font-bold mb-3 text-center text-[#0136fe]">Your Performance</h2>
-                  <div className="space-y-2">
-                    {playerResults.questions.map((q, i) => (
-                      <div key={q.question_id} className="rounded-xl px-4 py-3 flex items-start gap-3"
-                        style={{
-                          background: q.is_correct ? "rgba(76,175,80,0.15)" : "rgba(244,67,54,0.15)",
-                          border: `1px solid ${q.is_correct ? "rgba(76,175,80,0.4)" : "rgba(244,67,54,0.4)"}`,
-                        }}>
-                        <span className="text-xl mt-0.5 flex-shrink-0">{q.is_correct ? "✓" : "✗"}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-[#0136fe] leading-snug">{i + 1}. {q.question_text}</p>
-                          <p className="text-xs mt-1" style={{ color: "rgba(1,54,254,0.8)" }}>
-                            Your answer: <span style={{ color: q.is_correct ? "#4caf50" : "#f44336" }}>{q.selected_option_text}</span>
+              <motion.div
+                data-testid="player-results-breakdown"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <h2 className="text-lg font-bold mb-3 text-center text-[#0136fe]">Votre Performance</h2>
+                <div className="space-y-2">
+                  {playerResults.questions.map((q, i) => (
+                    <div key={q.question_id} className="rounded-xl px-4 py-3 flex items-start gap-3"
+                      style={{
+                        background: q.is_correct ? "rgba(76,175,80,0.15)" : "rgba(244,67,54,0.15)",
+                        border: `1px solid ${q.is_correct ? "rgba(76,175,80,0.4)" : "rgba(244,67,54,0.4)"}`,
+                      }}>
+                      <span className="text-xl mt-0.5 flex-shrink-0">{q.is_correct ? "✓" : "✗"}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[#0136fe] leading-snug">{i + 1}. {q.question_text}</p>
+                        <p className="text-xs mt-1" style={{ color: "rgba(1,54,254,0.8)" }}>
+                          Votre réponse : <span style={{ color: q.is_correct ? "#4caf50" : "#f44336" }}>{q.selected_option_text}</span>
+                        </p>
+                        {!q.is_correct && (
+                          <p className="text-xs" style={{ color: "rgba(1,54,254,0.8)" }}>
+                            Correct : <span style={{ color: "#4caf50" }}>{q.correct_option_text}</span>
                           </p>
-                          {!q.is_correct && (
-                            <p className="text-xs" style={{ color: "rgba(1,54,254,0.8)" }}>
-                              Correct: <span style={{ color: "#4caf50" }}>{q.correct_option_text}</span>
-                            </p>
-                          )}
-                        </div>
-                        {q.is_correct && <span className="font-black tabular-nums text-sm shrink-0" style={{ color: "#4caf50" }}>+{q.points}</span>}
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </motion.div>
+                      {q.is_correct && <span className="font-black tabular-nums text-sm shrink-0" style={{ color: "#4caf50" }}>+{q.points}</span>}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
             )}
           </div>
         )}
@@ -270,7 +270,7 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Back to Das
             <motion.a href="/join" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               className="w-full block text-center py-4 rounded-xl font-bold text-lg text-[#0136fe]"
               style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", boxShadow: "0 8px 30px rgba(255,107,53,0.4)" }}>
-              Play Again
+              Rejouer
             </motion.a>
           )}
         </motion.div>

@@ -13,9 +13,9 @@ function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={["/admin/history"]}>
+      <MemoryRouter initialEntries={["/host/history"]}>
         <Routes>
-          <Route path="/admin/history" element={<SessionHistoryPage />} />
+          <Route path="/host/history" element={<SessionHistoryPage />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>
@@ -57,7 +57,7 @@ describe("SessionHistoryPage", () => {
   it("shows empty state when no sessions", async () => {
     vi.mocked(sessionsApi.listSessions).mockResolvedValue([]);
     renderPage();
-    expect(await screen.findByText(/no sessions yet/i)).toBeInTheDocument();
+    expect(await screen.findByText(/pas encore de sessions/i)).toBeInTheDocument();
   });
 
   it("shows session rows when data loads", async () => {
@@ -81,15 +81,15 @@ describe("SessionHistoryPage", () => {
     vi.mocked(sessionsApi.listSessions).mockResolvedValue(fakeSessions);
     renderPage();
     await screen.findAllByText("Ramadan Trivia");
-    expect(screen.getByText("finished")).toBeInTheDocument();
-    expect(screen.getByText("active")).toBeInTheDocument();
+    expect(screen.getByText("terminée")).toBeInTheDocument();
+    expect(screen.getByText("en cours")).toBeInTheDocument();
   });
 
-  it("shows Delete button only for waiting sessions", async () => {
+  it("shows Supprimer button only for waiting sessions", async () => {
     vi.mocked(sessionsApi.listSessions).mockResolvedValue([...fakeSessions, waitingSession]);
     renderPage();
     await screen.findAllByText("Ramadan Trivia");
-    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /supprimer/i })).toBeInTheDocument();
   });
 
   it("opens confirm modal and calls endSession when delete is confirmed", async () => {
@@ -98,11 +98,11 @@ describe("SessionHistoryPage", () => {
     renderPage();
     await screen.findByText("111111");
 
-    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    await userEvent.click(screen.getByRole("button", { name: /supprimer/i }));
     const dialog = screen.getByRole("dialog");
     expect(dialog).toBeInTheDocument();
 
-    await userEvent.click(within(dialog).getByRole("button", { name: /delete/i }));
+    await userEvent.click(within(dialog).getByRole("button", { name: /supprimer/i }));
 
     await waitFor(() => {
       expect(vi.mocked(sessionsApi.endSession).mock.calls[0][0]).toBe("s3");
@@ -112,6 +112,6 @@ describe("SessionHistoryPage", () => {
   it("shows error state on fetch failure", async () => {
     vi.mocked(sessionsApi.listSessions).mockRejectedValue(new Error("network error"));
     renderPage();
-    expect(await screen.findByText(/failed to load session history/i)).toBeInTheDocument();
+    expect(await screen.findByText(/échec du chargement de l'historique/i)).toBeInTheDocument();
   });
 });

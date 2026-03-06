@@ -30,8 +30,8 @@ type loginRequest struct {
 }
 
 type authResponse struct {
-	Token string       `json:"token"`
-	Admin models.Admin `json:"admin"`
+	Token string      `json:"token"`
+	Host  models.Host `json:"host"`
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +59,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	admin := models.Admin{
+	host := models.Host{
 		ID:           uuid.New(),
 		Email:        req.Email,
 		PasswordHash: string(hash),
@@ -67,26 +67,26 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = h.db.Exec(r.Context(),
-		`INSERT INTO admins (id, email, password_hash, created_at) VALUES ($1, $2, $3, $4)`,
-		admin.ID, admin.Email, admin.PasswordHash, admin.CreatedAt,
+		`INSERT INTO hosts (id, email, password_hash, created_at) VALUES ($1, $2, $3, $4)`,
+		host.ID, host.Email, host.PasswordHash, host.CreatedAt,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			writeError(w, http.StatusConflict, "email already registered")
 		} else {
-			writeError(w, http.StatusInternalServerError, "failed to create admin")
+			writeError(w, http.StatusInternalServerError, "failed to create host")
 		}
 		return
 	}
 
-	token, err := h.generateToken(admin.ID.String())
+	token, err := h.generateToken(host.ID.String())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to generate token")
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, authResponse{Token: token, Admin: admin})
+	writeJSON(w, http.StatusCreated, authResponse{Token: token, Host: host})
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -100,32 +100,32 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var admin models.Admin
+	var host models.Host
 	err := h.db.QueryRow(r.Context(),
-		`SELECT id, email, password_hash, created_at FROM admins WHERE email = $1`, req.Email,
-	).Scan(&admin.ID, &admin.Email, &admin.PasswordHash, &admin.CreatedAt)
+		`SELECT id, email, password_hash, created_at FROM hosts WHERE email = $1`, req.Email,
+	).Scan(&host.ID, &host.Email, &host.PasswordHash, &host.CreatedAt)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(admin.PasswordHash), []byte(req.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(host.PasswordHash), []byte(req.Password)); err != nil {
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
 
-	token, err := h.generateToken(admin.ID.String())
+	token, err := h.generateToken(host.ID.String())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to generate token")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, authResponse{Token: token, Admin: admin})
+	writeJSON(w, http.StatusOK, authResponse{Token: token, Host: host})
 }
 
-func (h *Handler) generateToken(adminID string) (string, error) {
+func (h *Handler) generateToken(hostID string) (string, error) {
 	claims := jwt.MapClaims{
-		"sub": adminID,
+		"sub": hostID,
 		"exp": time.Now().Add(24 * time.Hour).Unix(),
 		"iat": time.Now().Unix(),
 	}

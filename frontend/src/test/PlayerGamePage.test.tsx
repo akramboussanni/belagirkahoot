@@ -74,7 +74,7 @@ const fakeQuestion = {
 describe("PlayerGamePage", () => {
   it("shows waiting spinner initially", () => {
     renderPlayerGame();
-    expect(screen.getByText(/get ready/i)).toBeInTheDocument();
+    expect(screen.getByText(/préparez-vous/i)).toBeInTheDocument();
   });
 
   it("displays question and options on question message", () => {
@@ -97,8 +97,8 @@ describe("PlayerGamePage", () => {
     });
 
     // Option buttons are replaced by the locked-in waiting card
-    expect(screen.getByText(/answer locked in/i)).toBeInTheDocument();
-    expect(screen.getByText(/waiting for others/i)).toBeInTheDocument();
+    expect(screen.getByText(/réponse validée/i)).toBeInTheDocument();
+    expect(screen.getByText(/en attente des autres joueurs/i)).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
@@ -109,11 +109,11 @@ describe("PlayerGamePage", () => {
     await userEvent.click(screen.getByRole("button", { name: /4/i }));
 
     // No reveal feedback — phase is still "question"
-    expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
+    expect(screen.queryByText("Correct !")).not.toBeInTheDocument();
     expect(screen.queryByText("Incorrect")).not.toBeInTheDocument();
     // Neutral waiting state shown
-    expect(screen.getByText(/answer locked in/i)).toBeInTheDocument();
-    expect(screen.getByText(/waiting for others/i)).toBeInTheDocument();
+    expect(screen.getByText(/réponse validée/i)).toBeInTheDocument();
+    expect(screen.getByText(/en attente des autres joueurs/i)).toBeInTheDocument();
   });
 
   it("shows reveal with correct feedback for this player", () => {
@@ -130,7 +130,7 @@ describe("PlayerGamePage", () => {
         },
       }),
     );
-    expect(screen.getByText("Correct!")).toBeInTheDocument();
+    expect(screen.getByText("Correct !")).toBeInTheDocument();
     expect(screen.getByText("+900")).toBeInTheDocument();
   });
 
@@ -166,7 +166,7 @@ describe("PlayerGamePage", () => {
     );
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Bob")).toBeInTheDocument();
-    expect(screen.getByText(/waiting for host/i)).toBeInTheDocument();
+    expect(screen.getByText(/en attente de l'hôte/i)).toBeInTheDocument();
   });
 
   it("shows podium screen on game_over", () => {
@@ -182,10 +182,10 @@ describe("PlayerGamePage", () => {
         },
       }),
     );
-    expect(screen.getByText(/game over/i)).toBeInTheDocument();
+    expect(screen.getByText(/jeu terminé/i)).toBeInTheDocument();
     // Alice is rank 1 — her score appears on the podium block.
     expect(screen.getAllByText("2700").length).toBeGreaterThanOrEqual(1);
-    // Rank 1 player sees their name on the podium (with "(you)" suffix) and the gold medal.
+    // Rank 1 player sees their name on the podium (with "(vous)" suffix) and the gold medal.
     expect(screen.getByText(/Alice/)).toBeInTheDocument();
     expect(screen.getByText("🥇")).toBeInTheDocument();
   });
@@ -200,7 +200,7 @@ describe("PlayerGamePage", () => {
         },
       }),
     );
-    const link = screen.getByRole("link", { name: /play again/i });
+    const link = screen.getByRole("link", { name: /rejouer/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "/join");
   });
@@ -312,7 +312,7 @@ describe("PlayerGamePage", () => {
     expect(sessionsApi.getPlayerResults).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID);
 
     // Wait for query to resolve — "See how you scored" button appears once results are ready
-    const seeScoreBtn = await screen.findByRole("button", { name: /see how you scored/i });
+    const seeScoreBtn = await screen.findByRole("button", { name: /voir vos résultats/i });
     fireEvent.click(seeScoreBtn);
     await screen.findByTestId("player-results-breakdown");
     expect(screen.getByText(/What is 2\+2\?/)).toBeInTheDocument();

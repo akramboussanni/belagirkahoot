@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/HassanA01/Iftaroot/backend/internal/config"
-	"github.com/HassanA01/Iftaroot/backend/internal/db"
-	"github.com/HassanA01/Iftaroot/backend/internal/hub"
+	"github.com/HassanA01/Hilal/backend/internal/config"
+	"github.com/HassanA01/Hilal/backend/internal/db"
+	"github.com/HassanA01/Hilal/backend/internal/hub"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/websocket"
@@ -74,7 +74,7 @@ func setupIntegration(t *testing.T) (srv *httptest.Server, pool *pgxpool.Pool, r
 	}
 
 	// Clean up any data from previous test runs.
-	tables := []string{"game_answers", "game_players", "game_sessions", "options", "questions", "quizzes", "admins"}
+	tables := []string{"game_answers", "game_players", "game_sessions", "options", "questions", "quizzes", "hosts"}
 	for _, tbl := range tables {
 		_, _ = pool.Exec(ctx, fmt.Sprintf("TRUNCATE %s CASCADE", tbl))
 	}
@@ -96,7 +96,7 @@ func setupIntegration(t *testing.T) (srv *httptest.Server, pool *pgxpool.Pool, r
 
 	cleanup = func() {
 		srv.Close()
-		tables := []string{"game_answers", "game_players", "game_sessions", "options", "questions", "quizzes", "admins"}
+		tables := []string{"game_answers", "game_players", "game_sessions", "options", "questions", "quizzes", "hosts"}
 		for _, tbl := range tables {
 			_, _ = pool.Exec(ctx, fmt.Sprintf("TRUNCATE %s CASCADE", tbl))
 		}

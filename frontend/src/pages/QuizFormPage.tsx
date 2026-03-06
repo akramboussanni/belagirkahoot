@@ -54,24 +54,24 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quizzes"] });
       if (isEdit) queryClient.invalidateQueries({ queryKey: ["quiz", quizID] });
-      navigate("/admin/quizzes");
+      navigate("/host/quizzes");
     },
   });
 
   function validate(): string | null {
-    if (!title.trim()) return "Quiz title is required.";
-    if (questions.length === 0) return "Add at least one question.";
+    if (!title.trim()) return "Le titre du quiz est requis.";
+    if (questions.length === 0) return "Ajoutez au moins une question.";
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      if (!q.text.trim()) return `Question ${i + 1} needs text.`;
+      if (!q.text.trim()) return `La question ${i + 1} doit avoir un texte.`;
       if (q.options.length < 2 || q.options.length > 4)
-        return `Question ${i + 1} must have 2–4 options.`;
+        return `La question ${i + 1} doit avoir entre 2 et 4 options.`;
       for (let j = 0; j < q.options.length; j++) {
         if (!q.options[j].text.trim())
-          return `Question ${i + 1}, option ${j + 1} needs text.`;
+          return `L'option ${j + 1} de la question ${i + 1} doit avoir un texte.`;
       }
       if (q.options.filter((o) => o.is_correct).length !== 1)
-        return `Question ${i + 1} must have exactly one correct option.`;
+        return `La question ${i + 1} doit avoir exactement une option correcte.`;
     }
     return null;
   }
@@ -117,8 +117,8 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
   }
 
   const inputStyle = {
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(1,54,254,0.2)",
+    background: "white",
+    border: "2px solid rgba(1,54,254,0.1)",
     color: "#0136fe",
   };
 
@@ -127,7 +127,7 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
       {/* Header */}
       <motion.div className="flex items-center gap-3 mb-8" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
-        <h2 className="text-2xl font-black text-[#0136fe]">{isEdit ? "Edit quiz" : "New quiz"}</h2>
+        <h2 className="text-2xl font-black text-[#0136fe]">{isEdit ? "Modifier le quiz" : "Nouveau quiz"}</h2>
       </motion.div>
 
       {!isEdit && (
@@ -135,27 +135,31 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
           <motion.button
             type="button"
             onClick={() => setShowAIModal(true)}
-            className="w-full mb-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 relative overflow-hidden"
+            className="w-full mb-8 py-5 rounded-3xl font-black text-sm flex items-center justify-center gap-3 relative overflow-hidden group"
             style={{
-              background: "linear-gradient(135deg, #0136fe 0%, #ff6b35 100%)",
+              background: "white",
               color: "#0136fe",
-              boxShadow: "0 6px 28px rgba(1,54,254,0.4)",
+              border: "2px solid rgba(1, 54, 254, 0.1)",
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.04)",
             }}
-            whileHover={{ scale: 1.01, boxShadow: "0 10px 36px rgba(1,54,254,0.55)" }}
+            whileHover={{ scale: 1.01, borderColor: "#0136fe", boxShadow: "0 15px 45px rgba(1, 54, 254, 0.1)" }}
             whileTap={{ scale: 0.99 }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}>
-            <motion.span
-              className="absolute inset-0 pointer-events-none"
+
+            <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            <motion.div
+              className="absolute inset-0 pointer-events-none opacity-30"
               style={{
-                background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%)",
+                background: "linear-gradient(105deg, transparent 40%, #abed00 50%, transparent 60%)",
                 backgroundSize: "200% 100%",
               }}
               animate={{ backgroundPositionX: ["200%", "-200%"] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             />
-            <Sparkles className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">Generate with AI</span>
+            <Sparkles className="w-5 h-5 relative z-10" />
+            <span className="relative z-10 tracking-widest uppercase">Générer avec l'IA</span>
           </motion.button>
 
           <AnimatePresence>
@@ -182,7 +186,7 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>Quiz title</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>Titre du quiz</label>
           <input
             type="text"
             required
@@ -192,117 +196,136 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
             style={inputStyle}
             onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
             onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-            placeholder="e.g. General Knowledge"
+            placeholder="ex: Culture Générale"
           />
         </motion.div>
 
         {/* Questions */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {questions.map((q, qIdx) => (
             <motion.div key={qIdx}
-              className="p-5 rounded-2xl space-y-4"
-              style={{ background: "linear-gradient(135deg, rgba(42,20,66,0.8) 0%, rgba(30,15,50,0.9) 100%)", border: "1px solid rgba(1,54,254,0.15)" }}
+              className="p-6 rounded-3xl space-y-5 border-2 relative overflow-hidden"
+              style={{
+                background: "white",
+                borderColor: "rgba(1, 54, 254, 0.08)",
+                boxShadow: "0 15px 45px rgba(0, 0, 0, 0.04)"
+              }}
               initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: qIdx * 0.04 }}>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
-                    style={{ background: "rgba(1,54,254,0.2)", color: "#0136fe" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-inner"
+                    style={{ background: "#0136fe", color: "white" }}>
                     {qIdx + 1}
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: "rgba(1,54,254,0.8)" }}>Question {qIdx + 1}</span>
+                  <span className="text-sm font-black uppercase tracking-widest" style={{ color: "#0136fe" }}>Question {qIdx + 1}</span>
                 </div>
                 {questions.length > 1 && (
-                  <button type="button" onClick={() => removeQuestion(qIdx)} aria-label="Remove"
-                    className="p-1.5 rounded-lg transition" style={{ color: "#f44336", background: "rgba(244,67,54,0.1)" }}>
-                    <Trash2 className="w-3.5 h-3.5" />
+                  <button type="button" onClick={() => removeQuestion(qIdx)} aria-label="Supprimer"
+                    className="p-2 rounded-xl transition-colors hover:bg-red-50" style={{ color: "#f44336" }}>
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
 
-              <input
-                type="text"
-                required
-                value={q.text}
-                onChange={(e) => updateQuestion(qIdx, { text: e.target.value })}
-                className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition"
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                placeholder="Question text"
-              />
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-black tracking-widest opacity-50 ml-1" style={{ color: "#0136fe" }}>Énoncé de la question</label>
+                  <input
+                    type="text"
+                    required
+                    value={q.text}
+                    onChange={(e) => updateQuestion(qIdx, { text: e.target.value })}
+                    className="w-full rounded-2xl px-5 py-3.5 text-sm outline-none transition-all placeholder:opacity-30 border-2"
+                    style={{
+                      background: "rgba(1, 54, 254, 0.02)",
+                      borderColor: "rgba(1, 54, 254, 0.08)",
+                      color: "#0136fe"
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "#0136fe")}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(1, 54, 254, 0.08)")}
+                    placeholder="Saisissez votre question ici..."
+                  />
+                </div>
 
-              <div className="flex items-center gap-3">
-                <label className="text-xs whitespace-nowrap" style={{ color: "rgba(1,54,254,0.7)" }}>Time limit (s)</label>
-                <input
-                  type="number"
-                  min={5}
-                  max={120}
-                  value={q.time_limit}
-                  onChange={(e) => updateQuestion(qIdx, { time_limit: Number(e.target.value) })}
-                  className="w-20 rounded-lg px-3 py-1.5 text-sm outline-none transition"
-                  style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                />
+                <div className="flex items-center gap-4 bg-black/5 p-3 rounded-2xl w-fit">
+                  <label className="text-[10px] uppercase font-black tracking-widest opacity-50" style={{ color: "#0136fe" }}>Temps (s)</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={120}
+                    value={q.time_limit}
+                    onChange={(e) => updateQuestion(qIdx, { time_limit: Number(e.target.value) })}
+                    className="w-16 rounded-xl px-3 py-1.5 font-bold text-center text-sm outline-none bg-white shadow-sm"
+                    style={{ color: "#0136fe" }}
+                  />
+                </div>
               </div>
 
               {/* Options */}
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {q.options.map((o, oIdx) => {
                   const color = OPTION_COLORS[oIdx % 4];
                   return (
-                    <div key={oIdx} className="flex items-center gap-3">
+                    <div key={oIdx} className="flex items-center gap-3 group/option">
                       <button
                         type="button"
                         onClick={() => setCorrect(qIdx, oIdx)}
-                        className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 transition"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all shadow-sm"
                         style={{
-                          background: o.is_correct ? color : `${color}22`,
-                          border: `2px solid ${o.is_correct ? color : `${color}44`}`,
-                          color: o.is_correct ? "white" : color,
-                        }}
-                        title="Mark as correct">
-                        {o.is_correct ? <Check className="w-4 h-4" /> : OPTION_LETTERS[oIdx]}
+                          background: o.is_correct ? color : "white",
+                          border: `2px solid ${o.is_correct ? color : "rgba(1, 54, 254, 0.1)"}`,
+                          color: o.is_correct ? "white" : "rgba(1, 54, 254, 0.3)",
+                        }}>
+                        {o.is_correct ? <Check className="w-5 h-5" /> : OPTION_LETTERS[oIdx]}
                       </button>
-                      <input
-                        type="text"
-                        required
-                        value={o.text}
-                        onChange={(e) => updateOption(qIdx, oIdx, { text: e.target.value })}
-                        className="flex-1 rounded-xl px-3 py-2 text-sm outline-none transition"
-                        style={inputStyle}
-                        onFocus={(e) => (e.target.style.borderColor = color)}
-                        onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                        placeholder={`Option ${oIdx + 1}`}
-                      />
-                      {q.options.length > 2 && (
-                        <button type="button" onClick={() => removeOption(qIdx, oIdx)}
-                          className="p-1.5 rounded-lg transition shrink-0" style={{ color: "rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.05)" }}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          required
+                          value={o.text}
+                          onChange={(e) => updateOption(qIdx, oIdx, { text: e.target.value })}
+                          className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all border-2"
+                          style={{
+                            background: "rgba(1, 54, 254, 0.02)",
+                            borderColor: "rgba(1, 54, 254, 0.08)",
+                            color: "#0136fe"
+                          }}
+                          onFocus={(e) => (e.target.style.borderColor = color)}
+                          onBlur={(e) => (e.target.style.borderColor = "rgba(1, 54, 254, 0.08)")}
+                          placeholder={`Réponse ${OPTION_LETTERS[oIdx]}...`}
+                        />
+                        {q.options.length > 2 && (
+                          <button type="button" onClick={() => removeOption(qIdx, oIdx)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg opacity-0 group-hover/option:opacity-100 transition-opacity hover:bg-red-50 text-red-500">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
-                {q.options.length < 4 && (
-                  <button type="button" onClick={() => addOption(qIdx)}
-                    className="text-xs font-medium transition mt-1 flex items-center gap-1"
-                    style={{ color: "#0136fe" }}>
-                    <Plus className="w-3 h-3" /> Add option
-                  </button>
-                )}
               </div>
+
+              {q.options.length < 4 && (
+                <button type="button" onClick={() => addOption(qIdx)}
+                  className="w-full py-2.5 rounded-xl border-2 border-dashed transition-all text-[10px] uppercase font-black tracking-widest"
+                  style={{ borderColor: "rgba(1, 54, 254, 0.1)", color: "rgba(1, 54, 254, 0.4)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#0136fe", e.currentTarget.style.color = "#0136fe")}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(1, 54, 254, 0.1)", e.currentTarget.style.color = "rgba(1, 54, 254, 0.4)")}>
+                  + Ajouter une option
+                </button>
+              )}
             </motion.div>
           ))}
 
           <motion.button
             type="button"
             onClick={addQuestion}
-            className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition"
-            style={{ border: "2px dashed rgba(1,54,254,0.3)", color: "rgba(1,54,254,0.7)" }}
-            whileHover={{ borderColor: "rgba(1,54,254,0.6)", color: "#0136fe" }}>
-            <Plus className="w-4 h-4" /> Add question
+            className="w-full py-5 rounded-3xl text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all border-4 bg-white/30 backdrop-blur-sm"
+            style={{ borderStyle: "dashed", borderColor: "rgba(1, 54, 254, 0.2)", color: "#0136fe" }}
+            whileHover={{ scale: 1.01, borderColor: "#0136fe", background: "white" }}>
+            <Plus className="w-5 h-5" /> Ajouter une question
           </motion.button>
         </div>
 
@@ -311,27 +334,28 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
             style={{ background: "rgba(244,67,54,0.1)", border: "1px solid rgba(244,67,54,0.3)", color: "#f44336" }}>
             {formError ??
               (mutation.error as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-              "Something went wrong. Please try again."}
+              "Un problème est survenu. Veuillez réessayer."}
           </div>
         )}
 
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center justify-between pt-6">
+          <button type="button" onClick={() => navigate("/host/quizzes")}
+            className="px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all hover:bg-black/5"
+            style={{ color: "rgba(1, 54, 254, 0.4)" }}>
+            Annuler
+          </button>
+
           <motion.button
             type="submit"
             disabled={mutation.isPending}
-            className="px-6 py-2.5 rounded-xl font-bold text-sm text-[#0136fe] disabled:cursor-not-allowed"
+            className="px-8 py-3.5 rounded-2xl font-black text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-500/20"
             style={{
-              background: mutation.isPending ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
-              boxShadow: mutation.isPending ? "none" : "0 6px 20px rgba(255,107,53,0.35)",
+              background: "#0136fe",
             }}
-            whileHover={!mutation.isPending ? { scale: 1.02 } : {}}
-            whileTap={!mutation.isPending ? { scale: 0.98 } : {}}>
-            {mutation.isPending ? "Saving…" : isEdit ? "Save changes" : "Create quiz"}
+            whileHover={!mutation.isPending ? { scale: 1.05, boxShadow: "0 20px 40px rgba(1, 54, 254, 0.2)" } : {}}
+            whileTap={!mutation.isPending ? { scale: 0.95 } : {}}>
+            {mutation.isPending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer le quiz"}
           </motion.button>
-          <button type="button" onClick={() => navigate("/admin/quizzes")}
-            className="text-sm transition" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Cancel
-          </button>
         </div>
       </form>
     </div>
@@ -346,10 +370,10 @@ function quizToInitial(quiz: Quiz) {
     questions:
       quiz.questions && quiz.questions.length > 0
         ? quiz.questions.map((q) => ({
-            text: q.text,
-            time_limit: q.time_limit,
-            options: q.options.map((o) => ({ text: o.text, is_correct: !!o.is_correct })),
-          }))
+          text: q.text,
+          time_limit: q.time_limit,
+          options: q.options.map((o) => ({ text: o.text, is_correct: !!o.is_correct })),
+        }))
         : [blankQuestion()],
   };
 }
@@ -378,13 +402,13 @@ export function QuizFormPage() {
   }
 
   if (isEdit && (isError || !existing)) {
-    return <p className="text-center py-12" style={{ color: "#f44336" }}>Quiz not found.</p>;
+    return <p className="text-center py-12" style={{ color: "#f44336" }}>Quiz non trouvé.</p>;
   }
 
   const initial = existing
     ? quizToInitial(existing)
     : (location.state as { generated?: { title: string; questions: QuestionDraft[] } })?.generated
-      ?? { title: "", questions: [blankQuestion()] };
+    ?? { title: "", questions: [blankQuestion()] };
 
   return <QuizForm quizID={quizID} initial={initial} />;
 }

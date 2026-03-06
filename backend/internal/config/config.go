@@ -16,13 +16,19 @@ type Config struct {
 	JWTSecret          string
 	FrontendURL        string
 	AnthropicAPIKey    string
+	GeminiAPIKey       string
 	AIRateLimitPerHour int
 }
 
 func Load() *Config {
 	anthropicKey := getEnv("ANTHROPIC_API_KEY", "")
 	if anthropicKey == "" {
-		log.Println("ANTHROPIC_API_KEY not set — AI quiz generation disabled")
+		log.Println("ANTHROPIC_API_KEY not set — AI quiz generation may fall back to Gemini")
+	}
+
+	geminiKey := getEnv("GEMINI_API_KEY", "")
+	if geminiKey == "" {
+		log.Println("GEMINI_API_KEY not set — AI quiz generation may fall back to Anthropic")
 	}
 
 	aiRateLimit := 5
@@ -39,6 +45,7 @@ func Load() *Config {
 		JWTSecret:          getEnv("JWT_SECRET", ""),
 		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:5173"),
 		AnthropicAPIKey:    anthropicKey,
+		GeminiAPIKey:       geminiKey,
 		AIRateLimitPerHour: aiRateLimit,
 	}
 }

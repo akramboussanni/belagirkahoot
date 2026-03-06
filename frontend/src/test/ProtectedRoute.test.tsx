@@ -3,30 +3,30 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, it, expect, beforeEach } from "vitest";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { useAuthStore } from "../stores/authStore";
-import type { Admin } from "../types";
+import type { Host } from "../types";
 
-const mockAdmin: Admin = {
+const mockHost: Host = {
   id: "abc-123",
-  email: "admin@test.com",
+  email: "host@test.com",
   created_at: new Date().toISOString(),
 };
 
 function renderWithRouter(isAuthed: boolean) {
   if (isAuthed) {
-    useAuthStore.getState().setAuth("tok123", mockAdmin);
+    useAuthStore.getState().setAuth("tok123", mockHost);
   } else {
     useAuthStore.getState().clearAuth();
   }
 
   return render(
-    <MemoryRouter initialEntries={["/admin"]}>
+    <MemoryRouter initialEntries={["/host"]}>
       <Routes>
         <Route path="/login" element={<div>Login Page</div>} />
         <Route
-          path="/admin"
+          path="/host"
           element={
             <ProtectedRoute>
-              <div>Admin Dashboard</div>
+              <div>Host Dashboard</div>
             </ProtectedRoute>
           }
         />
@@ -42,12 +42,12 @@ beforeEach(() => {
 describe("ProtectedRoute", () => {
   it("renders children when authenticated", () => {
     renderWithRouter(true);
-    expect(screen.getByText("Admin Dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Host Dashboard")).toBeInTheDocument();
   });
 
   it("redirects to /login when not authenticated", () => {
     renderWithRouter(false);
     expect(screen.getByText("Login Page")).toBeInTheDocument();
-    expect(screen.queryByText("Admin Dashboard")).not.toBeInTheDocument();
+    expect(screen.queryByText("Host Dashboard")).not.toBeInTheDocument();
   });
 });

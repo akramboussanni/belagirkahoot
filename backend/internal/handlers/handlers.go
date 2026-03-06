@@ -1,11 +1,16 @@
 package handlers
 
 import (
+	"context"
+	"log"
+
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/generative-ai-go/genai"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	googleOption "google.golang.org/api/option"
 
 	"github.com/HassanA01/Hilal/backend/internal/config"
 	"github.com/HassanA01/Hilal/backend/internal/game"
@@ -19,6 +24,7 @@ type Handler struct {
 	engine          *game.Engine
 	config          *config.Config
 	anthropicClient *anthropic.Client
+	geminiClient    *genai.Client
 }
 
 func New(db *pgxpool.Pool, redisClient *redis.Client, gameHub *hub.Hub, cfg *config.Config) *Handler {
@@ -27,6 +33,18 @@ func New(db *pgxpool.Pool, redisClient *redis.Client, gameHub *hub.Hub, cfg *con
 		c := anthropic.NewClient(option.WithAPIKey(cfg.AnthropicAPIKey))
 		ac = &c
 	}
+
+	var gc *genai.Client
+	if cfg.GeminiAPIKey != "" {
+		ctx := context.Background()
+		client, err := genai.NewClient(ctx, googleOption.WithAPIKey(cfg.GeminiAPIKey))
+		if err != nil {
+			log.Printf("failed to create gemini client: %v", err)
+		} else {
+			gc = client
+		}
+	}
+
 	return &Handler{
 		db:              db,
 		redis:           redisClient,
@@ -34,6 +52,7 @@ func New(db *pgxpool.Pool, redisClient *redis.Client, gameHub *hub.Hub, cfg *con
 		engine:          game.NewEngine(gameHub, db, redisClient),
 		config:          cfg,
 		anthropicClient: ac,
+		geminiClient:    gc,
 	}
 }
 
@@ -43,7 +62,7 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 		r.Post("/auth/register", h.Register)
 		r.Post("/auth/login", h.Login)
 
-		// Quiz management (admin only)
+		// Quiz management (host only)
 		r.Group(func(r chi.Router) {
 			r.Use(h.RequireAuth)
 			r.Get("/quizzes", h.ListQuizzes)

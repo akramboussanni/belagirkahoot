@@ -10,8 +10,8 @@ import (
 	appMiddleware "github.com/HassanA01/Hilal/backend/internal/middleware"
 )
 
-func withAdminID(req *http.Request, adminID string) *http.Request {
-	return req.WithContext(appMiddleware.ContextWithAdminID(req.Context(), adminID))
+func withHostID(req *http.Request, hostID string) *http.Request {
+	return req.WithContext(appMiddleware.ContextWithHostID(req.Context(), hostID))
 }
 
 func mustMarshal(v any) []byte {
@@ -35,7 +35,7 @@ func TestCreateQuiz_Validation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(tc.body))
 			req.Header.Set("Content-Type", "application/json")
-			req = withAdminID(req, "test-admin-id")
+			req = withHostID(req, "test-host-id")
 			w := httptest.NewRecorder()
 			h.CreateQuiz(w, req)
 			if w.Code != tc.wantStatus {
@@ -62,7 +62,7 @@ func TestUpdateQuiz_Validation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(tc.body))
 			req.Header.Set("Content-Type", "application/json")
-			req = withAdminID(req, "test-admin-id")
+			req = withHostID(req, "test-host-id")
 			w := httptest.NewRecorder()
 			h.UpdateQuiz(w, req)
 			if w.Code != tc.wantStatus {

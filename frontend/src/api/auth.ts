@@ -1,9 +1,9 @@
 import { apiClient } from "./client";
-import type { Admin } from "../types";
+import type { Host } from "../types";
 
 export interface AuthResponse {
   token: string;
-  admin: Admin;
+  host: Host;
 }
 
 export async function register(email: string, password: string): Promise<AuthResponse> {

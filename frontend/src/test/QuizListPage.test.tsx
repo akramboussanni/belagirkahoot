@@ -13,10 +13,10 @@ function renderList() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={["/admin/quizzes"]}>
+      <MemoryRouter initialEntries={["/host/quizzes"]}>
         <Routes>
-          <Route path="/admin/quizzes" element={<QuizListPage />} />
-          <Route path="/admin/quizzes/new" element={<div>new quiz</div>} />
+          <Route path="/host/quizzes" element={<QuizListPage />} />
+          <Route path="/host/quizzes/new" element={<div>new quiz</div>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>
@@ -27,13 +27,13 @@ describe("QuizListPage", () => {
   it("shows empty state when no quizzes", async () => {
     vi.mocked(quizzesApi.listQuizzes).mockResolvedValue([]);
     renderList();
-    expect(await screen.findByText(/no quizzes yet/i)).toBeInTheDocument();
+    expect(await screen.findByText(/pas encore de quiz/i)).toBeInTheDocument();
   });
 
   it("shows quiz titles when data loads", async () => {
     vi.mocked(quizzesApi.listQuizzes).mockResolvedValue([
-      { id: "1", admin_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
-      { id: "2", admin_id: "a", title: "Science Quiz", created_at: "2026-01-02T00:00:00Z" },
+      { id: "1", host_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
+      { id: "2", host_id: "a", title: "Science Quiz", created_at: "2026-01-02T00:00:00Z" },
     ]);
     renderList();
     expect(await screen.findByText("History Quiz")).toBeInTheDocument();
@@ -43,35 +43,35 @@ describe("QuizListPage", () => {
   it("shows error state on fetch failure", async () => {
     vi.mocked(quizzesApi.listQuizzes).mockRejectedValue(new Error("network error"));
     renderList();
-    expect(await screen.findByText(/failed to load/i)).toBeInTheDocument();
+    expect(await screen.findByText(/échec du chargement/i)).toBeInTheDocument();
   });
 
   it("opens confirm modal when Delete is clicked", async () => {
     vi.mocked(quizzesApi.listQuizzes).mockResolvedValue([
-      { id: "1", admin_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
+      { id: "1", host_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
     ]);
     renderList();
     await screen.findByText("History Quiz");
 
-    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    await userEvent.click(screen.getByRole("button", { name: /supprimer/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText(/delete "history quiz"/i)).toBeInTheDocument();
-    expect(screen.getByText(/this cannot be undone/i)).toBeInTheDocument();
+    expect(screen.getByText(/supprimer "history quiz"/i)).toBeInTheDocument();
+    expect(screen.getByText(/cette action est irréversible/i)).toBeInTheDocument();
   });
 
   it("closes modal and does not delete when Cancel is clicked", async () => {
     vi.mocked(quizzesApi.listQuizzes).mockResolvedValue([
-      { id: "1", admin_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
+      { id: "1", host_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
     ]);
     vi.mocked(quizzesApi.deleteQuiz).mockResolvedValue(undefined);
     renderList();
     await screen.findByText("History Quiz");
 
-    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    await userEvent.click(screen.getByRole("button", { name: /supprimer/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    await userEvent.click(screen.getByRole("button", { name: /annuler/i }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(quizzesApi.deleteQuiz).not.toHaveBeenCalled();
@@ -79,17 +79,17 @@ describe("QuizListPage", () => {
 
   it("calls deleteQuiz and closes modal when confirmed", async () => {
     vi.mocked(quizzesApi.listQuizzes).mockResolvedValue([
-      { id: "1", admin_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
+      { id: "1", host_id: "a", title: "History Quiz", created_at: "2026-01-01T00:00:00Z" },
     ]);
     vi.mocked(quizzesApi.deleteQuiz).mockResolvedValue(undefined);
     renderList();
     await screen.findByText("History Quiz");
 
-    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    await userEvent.click(screen.getByRole("button", { name: /supprimer/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     const dialog = screen.getByRole("dialog");
-    await userEvent.click(within(dialog).getByRole("button", { name: /delete/i }));
+    await userEvent.click(within(dialog).getByRole("button", { name: /supprimer/i }));
 
     await waitFor(() => {
       expect(quizzesApi.deleteQuiz).toHaveBeenCalled();

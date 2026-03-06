@@ -1,4 +1,4 @@
-export interface Admin {
+export interface Host {
   id: string;
   email: string;
   created_at: string;
@@ -22,7 +22,7 @@ export interface Question {
 
 export interface Quiz {
   id: string;
-  admin_id: string;
+  host_id: string;
   title: string;
   created_at: string;
   questions?: Question[];

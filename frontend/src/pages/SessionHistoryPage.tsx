@@ -8,15 +8,15 @@ import { listSessions, endSession } from "../api/sessions";
 import type { GameStatus } from "../types";
 
 const STATUS_STYLES: Record<GameStatus, { bg: string; color: string; label: string }> = {
-  waiting: { bg: "rgba(1,54,254,0.15)", color: "#0136fe", label: "waiting" },
-  active: { bg: "rgba(76,175,80,0.15)", color: "#4caf50", label: "active" },
-  finished: { bg: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", label: "finished" },
+  waiting: { bg: "rgba(1,54,254,0.1)", color: "#0136fe", label: "EN ATTENTE" },
+  active: { bg: "rgba(76,175,80,0.1)", color: "#4caf50", label: "ACTIVE" },
+  finished: { bg: "rgba(0,0,0,0.05)", color: "rgba(1,54,254,0.4)", label: "TERMINÉE" },
 };
 
 function StatusBadge({ status }: { status: GameStatus }) {
   const s = STATUS_STYLES[status];
   return (
-    <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+    <span className="text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest whitespace-nowrap"
       style={{ background: s.bg, color: s.color }}>
       {s.label}
     </span>
@@ -41,22 +41,22 @@ export function SessionHistoryPage() {
   });
 
   return (
-    <div>
+    <div className="max-w-4xl">
       {pendingDelete && (
         <ConfirmModal
-          title="Delete this session?"
-          message="This cannot be undone."
+          title="Supprimer cette session ?"
+          message="Cette action est irréversible."
           onConfirm={() => deleteMutation.mutate(pendingDelete)}
           onCancel={() => setPendingDelete(null)}
         />
       )}
 
-      <motion.h2 className="text-3xl font-black text-[#0136fe] mb-8" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        Session History
+      <motion.h2 className="text-3xl font-black text-[#0136fe] mb-10 tracking-tight" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        Historique des sessions
       </motion.h2>
 
       {isLoading && (
-        <div className="flex gap-3 justify-center py-12">
+        <div className="flex gap-3 justify-center py-20">
           {[0, 1, 2].map((i) => (
             <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#0136fe" }}
               animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
@@ -66,71 +66,73 @@ export function SessionHistoryPage() {
       )}
 
       {isError && (
-        <div className="text-center py-12 rounded-2xl" style={{ background: "rgba(244,67,54,0.1)", border: "1px solid rgba(244,67,54,0.3)" }}>
-          <p style={{ color: "#f44336" }}>Failed to load session history.</p>
+        <div className="text-center py-16 rounded-[2.5rem]" style={{ background: "rgba(244,67,54,0.05)", border: "2px solid rgba(244,67,54,0.1)" }}>
+          <p className="font-bold text-red-500">Échec du chargement de l'historique.</p>
         </div>
       )}
 
       {!isLoading && !isError && sessions.length === 0 && (
-        <motion.div className="text-center py-16 rounded-2xl"
-          style={{ background: "rgba(1,54,254,0.05)", border: "2px dashed rgba(1,54,254,0.3)" }}
+        <motion.div className="text-center py-20 rounded-[2.5rem]"
+          style={{ background: "rgba(1,54,254,0.02)", border: "2px dashed rgba(1,54,254,0.1)" }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <p className="text-lg text-[#0136fe] mb-1">No sessions yet.</p>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Host a game from the Quizzes page to get started.</p>
+          <p className="text-xl font-black text-[#0136fe] mb-2">Aucune session pour le moment</p>
+          <p className="text-sm font-bold opacity-40" style={{ color: "#0136fe" }}>Lancez un jeu depuis votre bibliothèque pour commencer.</p>
         </motion.div>
       )}
 
       {sessions.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sessions.map((s, i) => (
             <motion.div key={s.id}
-              className="px-4 sm:px-5 py-4 rounded-2xl flex items-start sm:items-center gap-3 sm:gap-4"
+              className="px-6 py-5 rounded-[2rem] flex flex-col md:flex-row md:items-center gap-5 border-2 transition-all"
               style={{
-                background: "linear-gradient(135deg, rgba(42,20,66,0.7) 0%, rgba(30,15,50,0.8) 100%)",
-                border: "1px solid rgba(1,54,254,0.12)",
+                background: "white",
+                borderColor: "rgba(1, 54, 254, 0.05)",
+                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.02)",
               }}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+              whileHover={{ borderColor: "rgba(1, 54, 254, 0.15)", boxShadow: "0 20px 50px rgba(1, 54, 254, 0.05)" }}>
 
               {/* Quiz title + meta */}
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-[#0136fe] truncate">{s.quiz_title}</p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                  <div className="flex items-center gap-1 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                <p className="text-lg font-black text-[#0136fe] truncate mb-2">{s.quiz_title}</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/5 text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(1, 54, 254, 0.5)" }}>
                     <Hash className="w-3 h-3" />
-                    <span className="font-mono">{s.code}</span>
+                    <span>{s.code}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/5 text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(1, 54, 254, 0.5)" }}>
                     <Calendar className="w-3 h-3" />
-                    <span>{new Date(s.created_at).toLocaleDateString()}</span>
+                    <span>{new Date(s.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/5 text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(1, 54, 254, 0.5)" }}>
                     <Users className="w-3 h-3" />
-                    <span>{s.player_count}</span>
+                    <span>{s.player_count} Joueurs</span>
                   </div>
                 </div>
               </div>
 
-              {/* Status + actions — stacked on mobile, inline on sm+ */}
-              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+              {/* Status + actions */}
+              <div className="flex items-center gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-black/5">
                 <StatusBadge status={s.status} />
                 {s.status === "waiting" && (
                   <div className="flex items-center gap-2">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Link to={`/admin/host/${s.code}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
-                        style={{ background: "rgba(1,54,254,0.15)", color: "#0136fe", border: "1px solid rgba(1,54,254,0.3)" }}>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        Resume
+                      <Link to={`/host/lobby/${s.code}`}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/10"
+                        style={{ background: "#0136fe", color: "white" }}>
+                        <ExternalLink className="w-4 h-4" />
+                        Reprendre
                       </Link>
                     </motion.div>
                     <motion.button
                       onClick={() => setPendingDelete(s.id)}
                       disabled={deleteMutation.isPending}
-                      aria-label="Delete"
-                      className="p-1.5 rounded-lg transition disabled:opacity-50"
-                      style={{ background: "rgba(244,67,54,0.1)", color: "#f44336", border: "1px solid rgba(244,67,54,0.25)" }}
+                      aria-label="Supprimer"
+                      className="p-2.5 rounded-xl transition-all hover:bg-red-50 disabled:opacity-50"
+                      style={{ color: "#f44336", border: "2px solid rgba(244, 67, 54, 0.1)" }}
                       whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </motion.button>
                   </div>
                 )}

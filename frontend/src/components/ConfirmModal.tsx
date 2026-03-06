@@ -8,7 +8,7 @@ interface ConfirmModalProps {
   confirmLabel?: string;
 }
 
-export function ConfirmModal({ title, message, onConfirm, onCancel, confirmLabel = "Delete" }: ConfirmModalProps) {
+export function ConfirmModal({ title, message, onConfirm, onCancel, confirmLabel = "Supprimer" }: ConfirmModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -39,7 +39,7 @@ export function ConfirmModal({ title, message, onConfirm, onCancel, confirmLabel
             style={{ background: "rgba(255,255,255,0.08)", color: "rgba(1,54,254,0.8)", border: "1px solid rgba(255,255,255,0.15)" }}
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
           >
-            Cancel
+            Annuler
           </motion.button>
           <motion.button
             onClick={onConfirm}

@@ -8,12 +8,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-hilal}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hilal}
       POSTGRES_DB: ${POSTGRES_DB:-hilal}
-    ports:
-      - "5435:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hilal}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hilal}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -21,12 +19,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "6380:6379"
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -49,12 +45,13 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-prod}
       FRONTEND_URL: "http://localhost:5173"
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
     ports:
       - "8081:8081"
     volumes:
       - ./backend:/app
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/health || exit 1"]
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8081/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,6 +69,7 @@ services:
     environment:
       VITE_API_BASE_URL: "http://localhost:8081/api/v1"
       VITE_WS_BASE_URL: "ws://localhost:8081"
+      VITE_APP_NAME: "Belagiri Kahoot"
     ports:
       - "5173:5173"
     volumes:

@@ -12,10 +12,10 @@ import (
 )
 
 func (h *Handler) ListQuizzes(w http.ResponseWriter, r *http.Request) {
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 	rows, err := h.db.Query(r.Context(),
-		`SELECT id, admin_id, title, created_at FROM quizzes WHERE admin_id = $1 ORDER BY created_at DESC`,
-		adminID,
+		`SELECT id, host_id, title, created_at FROM quizzes WHERE host_id = $1 ORDER BY created_at DESC`,
+		hostID,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to list quizzes")
@@ -26,7 +26,7 @@ func (h *Handler) ListQuizzes(w http.ResponseWriter, r *http.Request) {
 	var quizzes []models.Quiz
 	for rows.Next() {
 		var q models.Quiz
-		if err := rows.Scan(&q.ID, &q.AdminID, &q.Title, &q.CreatedAt); err != nil {
+		if err := rows.Scan(&q.ID, &q.HostID, &q.Title, &q.CreatedAt); err != nil {
 			writeError(w, http.StatusInternalServerError, "failed to scan quiz")
 			return
 		}
@@ -56,7 +56,7 @@ type optionInputItem struct {
 }
 
 func (h *Handler) CreateQuiz(w http.ResponseWriter, r *http.Request) {
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 
 	var req createQuizRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -69,9 +69,9 @@ func (h *Handler) CreateQuiz(w http.ResponseWriter, r *http.Request) {
 	}
 
 	quizID := uuid.New()
-	adminUUID, err := uuid.Parse(adminID)
+	hostUUID, err := uuid.Parse(hostID)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "invalid admin id")
+		writeError(w, http.StatusUnauthorized, "invalid host id")
 		return
 	}
 
@@ -83,8 +83,8 @@ func (h *Handler) CreateQuiz(w http.ResponseWriter, r *http.Request) {
 	defer func() { _ = tx.Rollback(r.Context()) }()
 
 	_, err = tx.Exec(r.Context(),
-		`INSERT INTO quizzes (id, admin_id, title) VALUES ($1, $2, $3)`,
-		quizID, adminUUID, req.Title,
+		`INSERT INTO quizzes (id, host_id, title) VALUES ($1, $2, $3)`,
+		quizID, hostUUID, req.Title,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to create quiz")
@@ -123,12 +123,12 @@ func (h *Handler) CreateQuiz(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetQuiz(w http.ResponseWriter, r *http.Request) {
 	quizID := chi.URLParam(r, "quizID")
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 
 	var quiz models.Quiz
 	err := h.db.QueryRow(r.Context(),
-		`SELECT id, admin_id, title, created_at FROM quizzes WHERE id = $1 AND admin_id = $2`, quizID, adminID,
-	).Scan(&quiz.ID, &quiz.AdminID, &quiz.Title, &quiz.CreatedAt)
+		`SELECT id, host_id, title, created_at FROM quizzes WHERE id = $1 AND host_id = $2`, quizID, hostID,
+	).Scan(&quiz.ID, &quiz.HostID, &quiz.Title, &quiz.CreatedAt)
 	if err != nil {
 		writeError(w, http.StatusNotFound, "quiz not found")
 		return
@@ -182,7 +182,7 @@ func (h *Handler) GetQuiz(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) UpdateQuiz(w http.ResponseWriter, r *http.Request) {
 	quizID := chi.URLParam(r, "quizID")
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 
 	var req createQuizRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -203,8 +203,8 @@ func (h *Handler) UpdateQuiz(w http.ResponseWriter, r *http.Request) {
 
 	// Verify ownership and update title atomically
 	result, err := tx.Exec(r.Context(),
-		`UPDATE quizzes SET title = $1 WHERE id = $2 AND admin_id = $3`,
-		req.Title, quizID, adminID,
+		`UPDATE quizzes SET title = $1 WHERE id = $2 AND host_id = $3`,
+		req.Title, quizID, hostID,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to update quiz")
@@ -251,9 +251,9 @@ func (h *Handler) UpdateQuiz(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteQuiz(w http.ResponseWriter, r *http.Request) {
 	quizID := chi.URLParam(r, "quizID")
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 	result, err := h.db.Exec(r.Context(),
-		`DELETE FROM quizzes WHERE id = $1 AND admin_id = $2`, quizID, adminID,
+		`DELETE FROM quizzes WHERE id = $1 AND host_id = $2`, quizID, hostID,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to delete quiz")

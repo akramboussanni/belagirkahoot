@@ -180,7 +180,7 @@ func newTestHandlerWithRedis(t *testing.T, limit int) (*Handler, *miniredis.Mini
 
 func TestCheckRateLimit_NilRedis(t *testing.T) {
 	h := newTestHandler() // redis is nil
-	retryAfter, limited := h.checkRateLimit(context.Background(), "admin-1")
+	retryAfter, limited := h.checkRateLimit(context.Background(), "host-1")
 	if limited {
 		t.Error("expected no rate limiting with nil redis")
 	}
@@ -191,7 +191,7 @@ func TestCheckRateLimit_NilRedis(t *testing.T) {
 
 func TestCheckRateLimit_ZeroLimit(t *testing.T) {
 	h, _ := newTestHandlerWithRedis(t, 0)
-	_, limited := h.checkRateLimit(context.Background(), "admin-1")
+	_, limited := h.checkRateLimit(context.Background(), "host-1")
 	if limited {
 		t.Error("expected no rate limiting with limit=0")
 	}
@@ -201,7 +201,7 @@ func TestCheckRateLimit_UnderLimit(t *testing.T) {
 	h, _ := newTestHandlerWithRedis(t, 5)
 	ctx := context.Background()
 	for i := 0; i < 5; i++ {
-		_, limited := h.checkRateLimit(ctx, "admin-1")
+		_, limited := h.checkRateLimit(ctx, "host-1")
 		if limited {
 			t.Fatalf("request %d should not be rate limited", i+1)
 		}
@@ -214,14 +214,14 @@ func TestCheckRateLimit_ExceedsLimit(t *testing.T) {
 
 	// Make 3 requests (at the limit)
 	for i := 0; i < 3; i++ {
-		_, limited := h.checkRateLimit(ctx, "admin-1")
+		_, limited := h.checkRateLimit(ctx, "host-1")
 		if limited {
 			t.Fatalf("request %d should not be rate limited", i+1)
 		}
 	}
 
 	// 4th request should be rate limited
-	retryAfter, limited := h.checkRateLimit(ctx, "admin-1")
+	retryAfter, limited := h.checkRateLimit(ctx, "host-1")
 	if !limited {
 		t.Error("4th request should be rate limited")
 	}
@@ -234,24 +234,24 @@ func TestCheckRateLimit_PerUser(t *testing.T) {
 	h, _ := newTestHandlerWithRedis(t, 2)
 	ctx := context.Background()
 
-	// admin-1 makes 2 requests
+	// host-1 makes 2 requests
 	for i := 0; i < 2; i++ {
-		_, limited := h.checkRateLimit(ctx, "admin-1")
+		_, limited := h.checkRateLimit(ctx, "host-1")
 		if limited {
-			t.Fatalf("admin-1 request %d should not be limited", i+1)
+			t.Fatalf("host-1 request %d should not be limited", i+1)
 		}
 	}
 
-	// admin-1 is now limited
-	_, limited := h.checkRateLimit(ctx, "admin-1")
+	// host-1 is now limited
+	_, limited := h.checkRateLimit(ctx, "host-1")
 	if !limited {
-		t.Error("admin-1 should be limited after 2 requests")
+		t.Error("host-1 should be limited after 2 requests")
 	}
 
-	// admin-2 should still be allowed
-	_, limited = h.checkRateLimit(ctx, "admin-2")
+	// host-2 should still be allowed
+	_, limited = h.checkRateLimit(ctx, "host-2")
 	if limited {
-		t.Error("admin-2 should not be limited")
+		t.Error("host-2 should not be limited")
 	}
 }
 
@@ -265,7 +265,7 @@ func TestGenerateQuiz_RateLimited(t *testing.T) {
 		})
 		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
-		req = req.WithContext(middleware.ContextWithAdminID(req.Context(), "admin-1"))
+		req = req.WithContext(middleware.ContextWithHostID(req.Context(), "host-1"))
 		w := httptest.NewRecorder()
 		h.GenerateQuiz(w, req)
 		return w

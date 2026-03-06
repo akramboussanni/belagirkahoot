@@ -21,7 +21,7 @@ import (
 )
 
 func (h *Handler) ListSessions(w http.ResponseWriter, r *http.Request) {
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 	quizID := r.URL.Query().Get("quiz_id")
 
 	query := `
@@ -31,8 +31,8 @@ func (h *Handler) ListSessions(w http.ResponseWriter, r *http.Request) {
 		FROM game_sessions gs
 		JOIN quizzes q ON q.id = gs.quiz_id
 		LEFT JOIN game_players gp ON gp.session_id = gs.id
-		WHERE q.admin_id = $1`
-	args := []any{adminID}
+		WHERE q.host_id = $1`
+	args := []any{hostID}
 
 	if quizID != "" {
 		query += ` AND gs.quiz_id = $2`
@@ -61,7 +61,7 @@ func (h *Handler) ListSessions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
-	adminID := appMiddleware.GetAdminID(r.Context())
+	hostID := appMiddleware.GetHostID(r.Context())
 
 	var req struct {
 		QuizID string `json:"quiz_id"`
@@ -75,11 +75,11 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Verify quiz exists and belongs to this admin
+	// Verify quiz exists and belongs to this host
 	var exists bool
 	err := h.db.QueryRow(r.Context(),
-		`SELECT EXISTS(SELECT 1 FROM quizzes WHERE id = $1 AND admin_id = $2)`,
-		req.QuizID, adminID,
+		`SELECT EXISTS(SELECT 1 FROM quizzes WHERE id = $1 AND host_id = $2)`,
+		req.QuizID, hostID,
 	).Scan(&exists)
 	if err != nil || !exists {
 		writeError(w, http.StatusNotFound, "quiz not found")

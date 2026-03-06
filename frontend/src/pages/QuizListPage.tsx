@@ -32,15 +32,15 @@ export function QuizListPage() {
 
   const hostMutation = useMutation({
     mutationFn: createSession,
-    onSuccess: (data) => navigate(`/admin/host/${data.code}`),
+    onSuccess: (data) => navigate(`/host/lobby/${data.code}`),
   });
 
   return (
     <div>
       {pendingDelete && (
         <ConfirmModal
-          title={`Delete "${pendingDelete.title}"?`}
-          message="This cannot be undone."
+          title={`Supprimer "${pendingDelete.title}" ?`}
+          message="Cette action est irréversible."
           onConfirm={() => deleteMutation.mutate(pendingDelete.id)}
           onCancel={() => setPendingDelete(null)}
         />
@@ -48,13 +48,13 @@ export function QuizListPage() {
 
       {/* Header */}
       <motion.div className="flex items-center justify-between mb-8" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-3xl font-black text-[#0136fe]">Game Library</h2>
+        <h2 className="text-3xl font-black text-[#0136fe]">Bibliothèque</h2>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Link to="/admin/quizzes/new"
+          <Link to="/host/quizzes/new"
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
             style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", color: "#0136fe", boxShadow: "0 4px 20px rgba(255,107,53,0.4)" }}>
             <Plus className="w-4 h-4" />
-            New Quiz
+            Nouveau Quiz
           </Link>
         </motion.div>
       </motion.div>
@@ -72,7 +72,7 @@ export function QuizListPage() {
 
       {isError && (
         <div className="text-center py-12 rounded-2xl" style={{ background: "rgba(244,67,54,0.1)", border: "1px solid rgba(244,67,54,0.3)" }}>
-          <p style={{ color: "#f44336" }}>Failed to load quizzes.</p>
+          <p style={{ color: "#f44336" }}>Échec du chargement des quiz.</p>
         </div>
       )}
 
@@ -80,75 +80,86 @@ export function QuizListPage() {
         <motion.div className="text-center py-16 rounded-2xl"
           style={{ background: "rgba(1,54,254,0.05)", border: "2px dashed rgba(1,54,254,0.3)" }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <p className="text-lg text-[#0136fe] mb-2">No quizzes yet.</p>
-          <Link to="/admin/quizzes/new" className="text-sm font-semibold" style={{ color: "#0136fe" }}>
-            Create your first quiz →
+          <p className="text-lg text-[#0136fe] mb-2">Aucun quiz pour le moment.</p>
+          <Link to="/host/quizzes/new" className="text-sm font-semibold" style={{ color: "#0136fe" }}>
+            Créez votre premier quiz →
           </Link>
         </motion.div>
       )}
 
       {/* Quiz grid */}
       {quizzes.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {quizzes.map((quiz, i) => (
             <motion.div key={quiz.id}
-              className="p-6 rounded-2xl relative overflow-hidden group cursor-pointer"
+              className="p-6 rounded-3xl relative overflow-hidden group border-2 transition-all"
               style={{
-                background: "linear-gradient(135deg, rgba(42,20,66,0.8) 0%, rgba(30,15,50,0.9) 100%)",
-                border: "1px solid rgba(1,54,254,0.2)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                background: "white",
+                borderColor: "rgba(1, 54, 254, 0.08)",
+                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.03)",
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              whileHover={{ boxShadow: "0 8px 30px rgba(1,54,254,0.2)" }}>
+              whileHover={{
+                y: -5,
+                borderColor: "rgba(1, 54, 254, 0.2)",
+                boxShadow: "0 20px 50px rgba(1, 54, 254, 0.1)"
+              }}>
+
+              {/* Top Accent */}
+              <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: i % 2 === 0 ? "#0136fe" : "#ff6b35" }} />
 
               {/* Quiz info */}
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-[#0136fe] mb-2 pr-2 leading-snug">{quiz.title}</h3>
-                <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>
+              <div className="mb-6">
+                <h3 className="text-xl font-black text-[#0136fe] mb-3 pr-2 leading-tight group-hover:text-[#0136fe]/80 transition-colors">
+                  {quiz.title}
+                </h3>
+                <div className="flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(1,54,254,0.5)" }}>
                   {quiz.questions != null && (
-                    <div className="flex items-center gap-1">
-                      <BarChart3 className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/5">
+                      <BarChart3 className="w-3.5 h-3.5" />
                       <span>{quiz.questions.length} questions</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>{new Date(quiz.created_at).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{new Date(quiz.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 mt-4">
+              <div className="flex items-center gap-2 mt-auto">
                 <motion.button
                   onClick={() => hostMutation.mutate(quiz.id)}
                   disabled={hostMutation.isPending}
-                  className="flex-1 py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg, #0136fe 0%, #ffd700 100%)", color: "#b7f700" }}
-                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <Play className="w-4 h-4" />
-                  Host
+                  className="flex-1 py-3 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  style={{ background: "#0136fe", color: "white" }}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Play className="w-4 h-4 fill-current" />
+                  Lancer
                 </motion.button>
 
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link to={`/admin/quizzes/${quiz.id}/edit`}
-                    className="p-2 rounded-lg flex items-center justify-center"
-                    style={{ background: "rgba(33,150,243,0.2)", color: "#2196f3", border: "1px solid rgba(33,150,243,0.3)" }}>
-                    <Pencil className="w-4 h-4" />
-                  </Link>
-                </motion.div>
+                <div className="flex gap-2">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link to={`/host/quizzes/${quiz.id}/edit`}
+                      className="w-11 h-11 rounded-2xl flex items-center justify-center border-2 transition-all"
+                      style={{ borderColor: "rgba(1, 54, 254, 0.1)", color: "#0136fe" }}>
+                      <Pencil className="w-4 h-4" />
+                    </Link>
+                  </motion.div>
 
-                <motion.button
-                  onClick={() => setPendingDelete({ id: quiz.id, title: quiz.title })}
-                  disabled={deleteMutation.isPending}
-                  aria-label="Delete"
-                  className="p-2 rounded-lg flex items-center justify-center disabled:opacity-50"
-                  style={{ background: "rgba(244,67,54,0.15)", color: "#f44336", border: "1px solid rgba(244,67,54,0.3)" }}
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Trash2 className="w-4 h-4" />
-                </motion.button>
+                  <motion.button
+                    onClick={() => setPendingDelete({ id: quiz.id, title: quiz.title })}
+                    disabled={deleteMutation.isPending}
+                    aria-label="Supprimer"
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center border-2 transition-all disabled:opacity-50"
+                    style={{ borderColor: "rgba(244, 67, 54, 0.1)", color: "#f44336" }}
+                    whileHover={{ scale: 1.05, background: "rgba(244, 67, 54, 0.05)" }} whileTap={{ scale: 0.95 }}>
+                    <Trash2 className="w-4 h-4" />
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           ))}

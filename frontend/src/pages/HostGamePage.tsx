@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ChevronRight, Users, LogOut } from "lucide-react";
+import { ChevronRight, Check } from "lucide-react";
 
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
@@ -11,6 +11,10 @@ import { PodiumScreen } from "../components/PodiumScreen";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { PrayerArcTransition } from "../components/PrayerArcTransition";
 import type { WsMessage, LeaderboardEntry, PodiumEntry } from "../types";
+import { GameBackground } from "../components/GameBackground";
+import { GameHeader } from "../components/GameHeader";
+import { GameCard } from "../components/GameCard";
+import { GameBrand } from "../components/GameBrand";
 
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8081";
 
@@ -125,38 +129,60 @@ export function HostGamePage() {
   });
 
   const handleNextQuestion = () => setPhase("arc_transition");
-  const handleEndGame = () => navigate("/admin");
+  const handleEndGame = () => navigate("/host");
 
   async function handleForceEndGame() {
     if (activeSession) {
       try { await endSession(activeSession.sessionId); } catch { /* ignore */ }
       clearActiveSession();
     }
-    navigate("/admin", { replace: true });
+    navigate("/host", { replace: true });
   }
 
-  if (phase === "waiting") {
-    return (
-      <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center" style={{ background: "#b7f700" }}>
-        <div className="fun-pattern" />
-        <div className="relative z-10 text-center space-y-4">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
-            <img src="/favicon.png" alt="Logo" className="w-12 h-12 mx-auto object-contain drop-shadow-md" />
-          </motion.div>
-          <p className="text-lg font-semibold text-[#0136fe]">Starting game…</p>
-          <div className="flex items-center justify-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
-            <p className="text-sm" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
-              {wsReady ? "Connected" : "Connecting…"}
-            </p>
-          </div>
+  const wrapContent = (content: React.ReactNode, hideHeaderInfo?: boolean) => (
+    <GameBackground>
+      <div className="flex flex-col min-h-screen">
+        <GameHeader
+          code={code!}
+          onExit={() => setShowEndConfirm(true)}
+          gameTitle="Présentation"
+          answeredCount={hideHeaderInfo ? undefined : answeredCount}
+          totalPlayers={hideHeaderInfo ? undefined : totalPlayers}
+        />
+        <div className="flex-1 flex flex-col p-6 w-full max-w-4xl mx-auto">
+          {content}
         </div>
       </div>
+      {showEndConfirm && (
+        <ConfirmModal
+          title="Terminer le jeu ?"
+          message="Cela mettra fin à la session pour tous les joueurs. Cette action est irréversible."
+          confirmLabel="Quitter le jeu"
+          onConfirm={handleForceEndGame}
+          onCancel={() => setShowEndConfirm(false)}
+        />
+      )}
+    </GameBackground>
+  );
+
+  if (phase === "waiting") {
+    return wrapContent(
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <GameBrand />
+        <p className="mt-8 font-black text-2xl uppercase tracking-[0.2em] animate-pulse" style={{ color: "#0136fe" }}>Démarrage en cours…</p>
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <span className={`w-3 h-3 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} shadow-lg`} />
+          <p className="text-sm font-bold uppercase tracking-widest" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
+            {wsReady ? "Connecté" : "Connexion…"}
+          </p>
+        </div>
+      </div>,
+      true
     );
   }
 
   if (phase === "podium") {
-    return <PodiumScreen entries={podium.slice(0, 3)} onEnd={handleEndGame} endLabel="Back to Dashboard" />;
+    return <PodiumScreen entries={podium.slice(0, 3)} onEnd={handleEndGame} endLabel="Retour au tableau de bord" />;
   }
 
   if (phase === "arc_transition") {
@@ -169,209 +195,152 @@ export function HostGamePage() {
 
   if (phase === "leaderboard") {
     const isLastQuestion = !currentQuestion || currentQuestion.question_index + 1 >= currentQuestion.total_questions;
-    return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-        <div className="fun-pattern" />
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
-          <div className="w-full max-w-lg space-y-6">
-            <motion.h2 className="text-2xl font-black text-center" style={{ color: "#0136fe" }}
-              initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-              Leaderboard
-            </motion.h2>
-            <LeaderboardDisplay entries={leaderboard} prevEntries={prevLeaderboard} />
-            <motion.button
-              onClick={handleNextQuestion}
-              className="w-full py-4 rounded-xl font-bold text-lg text-[#0136fe] flex items-center justify-center gap-2"
-              style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", boxShadow: "0 8px 30px rgba(255,107,53,0.4)" }}
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              {isLastQuestion ? "Show Final Results" : "Next Question"}
-              <ChevronRight className="w-5 h-5" />
-            </motion.button>
-          </div>
+    return wrapContent(
+      <div className="flex flex-col items-center justify-center flex-1">
+        <div className="w-full max-w-2xl space-y-8">
+          <h2 className="text-4xl font-black text-center uppercase tracking-tight" style={{ color: "#0136fe" }}>
+            Classement Actuel
+          </h2>
+          <LeaderboardDisplay entries={leaderboard} prevEntries={prevLeaderboard} maxEntries={5} />
+          <motion.button
+            onClick={handleNextQuestion}
+            className="w-full py-5 rounded-2xl font-black text-xl text-white flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all uppercase tracking-widest"
+            style={{ background: "#ff6b35" }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            {isLastQuestion ? "Voir le podium final" : "Question Suivante"}
+            <ChevronRight className="w-6 h-6" strokeWidth={3} />
+          </motion.button>
         </div>
-      </div>
+      </div>,
+      true
     );
   }
 
-  // Question + Reveal split panel
   const circumference = 2 * Math.PI * 54;
   const dashOffset = circumference * (1 - timeLeft / Math.max(timeLimit, 1));
+  const isUrgent = timeLeft <= 5 && timeLeft > 0;
 
-  return (
-    <div className="min-h-screen w-full relative overflow-hidden flex flex-col" style={{ background: "#b7f700" }}>
-      <div className="fun-pattern" />
-
-      {showEndConfirm && (
-        <ConfirmModal
-          title="End the game?"
-          message="This will end the session for all players. This cannot be undone."
-          confirmLabel="End Game"
-          onConfirm={handleForceEndGame}
-          onCancel={() => setShowEndConfirm(false)}
-        />
-      )}
-
-      {/* Top bar */}
-      <div className="relative z-20 px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between"
-        style={{ background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(240,240,240,1) 100%)", borderBottom: "1px solid rgba(1,54,254,0.2)" }}>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
-          <span className="hidden sm:inline text-lg font-bold" style={{ color: "#0136fe" }}>{import.meta.env.VITE_APP_NAME || 'Kahoot'} Live</span>
-          <span className="font-mono text-sm px-2 py-0.5 rounded" style={{ background: "rgba(1,54,254,0.1)", color: "rgba(1,54,254,0.7)" }}>{code}</span>
+  return wrapContent(
+    currentQuestion && (
+      <div className="flex flex-col gap-6 flex-1 w-full justify-center">
+        {/* Progress Bar */}
+        <div className="w-full h-2 rounded-full overflow-hidden bg-white/50 border border-slate-200">
+          <motion.div className="h-full rounded-full"
+            style={{ background: "#0136fe" }}
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentQuestion.question_index + 1) / currentQuestion.total_questions) * 100}%` }}
+            transition={{ duration: 0.5 }} />
         </div>
-        {currentQuestion && (
-          <div className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>
-            Question <span className="font-bold text-[#0136fe]">{currentQuestion.question_index + 1}</span> / {currentQuestion.total_questions}
+
+        {/* Question Card */}
+        <GameCard className="flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <span className="font-black text-sm uppercase tracking-widest px-3 py-1 rounded bg-[#b7f700] text-[#0136fe]">
+              Q{currentQuestion.question_index + 1}
+            </span>
+            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest opacity-40 text-[#0136fe]">
+              {currentQuestion.question_index + 1}/{currentQuestion.total_questions}
+            </div>
           </div>
-        )}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-1.5">
-            <Users className="w-4 h-4" style={{ color: "#2196f3" }} />
-            <span className="font-bold text-[#0136fe]">{answeredCount}</span>
-            {totalPlayers > 0 && (
-              <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>/ {totalPlayers}</span>
-            )}
-            <span className="hidden sm:inline text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>answered</span>
-            <span className={`ml-1 w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
+
+          <h2 className="text-4xl sm:text-5xl font-black text-[#0136fe] leading-tight text-center px-4">
+            {currentQuestion.question.text}
+          </h2>
+
+          <div className="flex justify-center mt-12 mb-4">
+            <div className="relative w-32 h-32 flex items-center justify-center bg-white rounded-full shadow-inner border-[6px] border-slate-50">
+              <svg className="absolute inset-0 w-full h-full" style={{ transform: "rotate(-90deg)" }} viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" stroke="transparent" strokeWidth="8" fill="none" />
+                <circle cx="60" cy="60" r="54"
+                  stroke={isUrgent ? "#f44336" : "#0136fe"}
+                  strokeWidth="8" fill="none" strokeLinecap="round"
+                  style={{
+                    strokeDasharray: circumference,
+                    strokeDashoffset: dashOffset,
+                    transition: "stroke-dashoffset 1s linear, stroke 0.3s ease",
+                  }} />
+              </svg>
+              <motion.div className="absolute inset-0 flex items-center justify-center text-5xl font-black"
+                style={{ color: isUrgent ? "#f44336" : "#0136fe" }}
+                animate={isUrgent ? { scale: [1, 1.15, 1] } : {}}
+                transition={{ duration: 0.5, repeat: Infinity }}>
+                {timeLeft}
+              </motion.div>
+            </div>
           </div>
-          <motion.button onClick={() => setShowEndConfirm(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold"
-            style={{ background: "rgba(244,67,54,0.15)", color: "#f44336", border: "1px solid rgba(244,67,54,0.3)" }}>
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">End Game</span>
-          </motion.button>
-        </div>
-      </div>
+        </GameCard>
 
-      {currentQuestion && (
-        <div className="relative z-10 flex-1 flex flex-col gap-5 p-4 sm:p-6 max-w-2xl mx-auto w-full">
-          {/* Progress bar */}
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Progress</p>
-              <p className="font-bold text-sm" style={{ color: "#0136fe" }}>
-                Q{currentQuestion.question_index + 1} / {currentQuestion.total_questions}
-              </p>
-            </div>
-            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
-              <motion.div className="h-full rounded-full"
-                style={{ background: "linear-gradient(90deg, #0136fe 0%, #ffd700 100%)" }}
-                initial={{ width: 0 }}
-                animate={{ width: `${((currentQuestion.question_index + 1) / currentQuestion.total_questions) * 100}%` }}
-                transition={{ duration: 0.5 }} />
-            </div>
-          </motion.div>
-
-          {/* Question card */}
-          <motion.div className="p-8 rounded-3xl flex flex-col"
-            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)", border: "2px solid rgba(1,54,254,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
-            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg"
-                style={{ background: "rgba(1,54,254,0.2)", color: "#0136fe", border: "2px solid rgba(1,54,254,0.5)" }}>
-                Q{currentQuestion.question_index + 1}
-              </div>
-              <img src="/favicon.png" alt="Logo" className="w-5 h-5 object-contain drop-shadow-md" />
-            </div>
-            <h2 className="text-3xl font-bold text-[#0136fe] leading-tight">{currentQuestion.question.text}</h2>
-
-            {/* Timer circle */}
-            <div className="flex justify-center mt-8">
-              <div className="relative w-28 h-28">
-                <svg className="w-28 h-28" style={{ transform: "rotate(-90deg)" }} viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="54" stroke="rgba(1,54,254,0.15)" strokeWidth="8" fill="none" />
-                  <circle cx="60" cy="60" r="54"
-                    stroke={timeLeft <= 5 ? "#f44336" : "#0136fe"}
-                    strokeWidth="8" fill="none" strokeLinecap="round"
-                    style={{
-                      strokeDasharray: circumference,
-                      strokeDashoffset: dashOffset,
-                      filter: `drop-shadow(0 0 ${timeLeft <= 5 ? "20px rgba(244,67,54,0.8)" : "12px rgba(1,54,254,0.6)"})`,
-                      transition: "stroke-dashoffset 1s linear, stroke 0.3s ease",
-                    }} />
-                </svg>
-                <motion.div className="absolute inset-0 flex items-center justify-center text-4xl font-black"
-                  style={{ color: timeLeft <= 5 ? "#f44336" : "#0136fe" }}
-                  animate={timeLeft <= 5 && timeLeft > 0 ? { scale: [1, 1.15, 1] } : {}}
-                  transition={{ duration: 0.5, repeat: Infinity }}>
-                  {timeLeft}
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Status bar */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            {phase === "reveal" && revealPayload ? (
-              <div className="p-4 rounded-xl flex items-center justify-center gap-2"
-                style={{ background: "rgba(76,175,80,0.15)", border: "1px solid rgba(76,175,80,0.3)" }}>
-                <span className="text-2xl font-black" style={{ color: "#4caf50" }}>
-                  {Object.values(revealPayload.scores).filter((s) => s.is_correct).length}
-                </span>
-                <span className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>
-                  / {Object.keys(revealPayload.scores).length} answered correctly
-                </span>
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl flex items-center gap-3"
-                style={{ background: "rgba(1,54,254,0.08)", border: "1px solid rgba(1,54,254,0.2)" }}>
-                <motion.div className="w-2 h-2 rounded-full bg-green-400" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                <span className="text-sm font-bold text-[#0136fe]">
-                  {answeredCount}{totalPlayers > 0 ? ` / ${totalPlayers}` : ""}
-                </span>
-                <span className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>players have answered</span>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Options */}
-          <motion.div className="p-6 rounded-3xl space-y-3"
-            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)", border: "2px solid rgba(1,54,254,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>Answer Options</h3>
-              {phase === "reveal" && (
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(76,175,80,0.2)", color: "#4caf50" }}>Revealed</span>
-              )}
-            </div>
+        {/* Status/Reveal Area */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-4 flex-1">
+          {/* Answer Options Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
             {currentQuestion.question.options.map((opt, i) => {
               const color = OPTION_COLORS[i % 4];
               const isCorrect = opt.is_correct;
               const revealed = phase === "reveal";
               const dimmed = revealed && !isCorrect;
+
               return (
                 <motion.div key={opt.id}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                  className="flex items-center gap-4 px-6 py-5 rounded-[2rem] shadow-sm relative overflow-hidden transition-all"
                   style={{
-                    background: `${color}${dimmed ? "11" : "22"}`,
-                    border: `2px solid ${revealed ? (isCorrect ? color : "rgba(255,255,255,0.08)") : `${color}55`}`,
-                    opacity: dimmed ? 0.4 : 1,
+                    background: revealed ? (isCorrect ? "#b7f700" : "white") : color,
+                    border: `4px solid ${revealed ? (isCorrect ? "#b7f700" : "white") : color}`,
+                    opacity: dimmed ? 0.5 : 1,
                   }}
-                  initial={{ opacity: 0, x: 20 }} animate={{ opacity: dimmed ? 0.4 : 1, x: 0 }} transition={{ delay: i * 0.08 }}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-[#0136fe] shrink-0 text-sm"
-                    style={{ background: color }}>
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: dimmed ? 0.5 : 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}>
+
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-2xl shrink-0 ${revealed ? (isCorrect ? "bg-[#0136fe] text-white" : "bg-slate-100 text-slate-400") : "bg-white/20 text-white"}`}>
                     {OPTION_LETTERS[i]}
                   </div>
-                  <span className="font-medium text-[#0136fe] flex-1 text-sm leading-snug">{opt.text}</span>
+
+                  <span className={`font-black text-xl flex-1 leading-snug ${revealed ? (isCorrect ? "text-[#0136fe]" : "text-slate-400") : "text-white"}`}>
+                    {opt.text}
+                  </span>
+
                   {revealed && isCorrect && (
-                    <motion.span className="text-xl font-black shrink-0" style={{ color }}
-                      initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>
-                      ✓
-                    </motion.span>
+                    <motion.div
+                      className="absolute right-6 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
+                      initial={{ scale: 0, rotate: -45 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 300, delay: 0.2 }}>
+                      <Check className="w-6 h-6 text-[#0136fe]" strokeWidth={4} />
+                    </motion.div>
                   )}
                 </motion.div>
               );
             })}
-          </motion.div>
-
-          {phase === "reveal" && (
-            <p className="text-center text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Leaderboard coming up…
-            </p>
-          )}
+          </div>
         </div>
-      )}
-    </div>
+
+        {/* Answer Stats Bottom area if revealed */}
+        {phase === "reveal" && revealPayload && (
+          <GameCard className="flex items-center justify-between !py-4" animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }}>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-[#b7f700] flex items-center justify-center">
+                <span className="text-3xl font-black text-[#0136fe]">
+                  {Object.values(revealPayload.scores).filter((s) => s.is_correct).length}
+                </span>
+              </div>
+              <div>
+                <p className="font-black text-xl text-[#0136fe] uppercase tracking-wide">Réponses correctes</p>
+                <p className="font-bold opacity-50 text-[#0136fe]">sur {Object.keys(revealPayload.scores).length} joueurs</p>
+              </div>
+            </div>
+
+            <motion.button
+              onClick={handleNextQuestion}
+              className="px-8 py-4 rounded-2xl font-black text-white flex items-center gap-2 uppercase tracking-widest hover:scale-105 transition-transform"
+              style={{ background: "#ff6b35" }}>
+              Suite <ChevronRight className="w-5 h-5" strokeWidth={3} />
+            </motion.button>
+          </GameCard>
+        )}
+      </div>
+    )
   );
 }

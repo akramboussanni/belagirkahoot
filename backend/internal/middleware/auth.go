@@ -10,7 +10,7 @@ import (
 
 type contextKey string
 
-const AdminIDKey contextKey = "admin_id"
+const HostIDKey contextKey = "host_id"
 
 func RequireAuth(jwtSecret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -36,19 +36,19 @@ func RequireAuth(jwtSecret string) func(http.Handler) http.Handler {
 				http.Error(w, `{"error":"unauthorized"}`, http.StatusUnauthorized)
 				return
 			}
-			adminID, _ := claims["sub"].(string)
-			ctx := context.WithValue(r.Context(), AdminIDKey, adminID)
+			hostID, _ := claims["sub"].(string)
+			ctx := context.WithValue(r.Context(), HostIDKey, hostID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-func GetAdminID(ctx context.Context) string {
-	v, _ := ctx.Value(AdminIDKey).(string)
+func GetHostID(ctx context.Context) string {
+	v, _ := ctx.Value(HostIDKey).(string)
 	return v
 }
 
-// ContextWithAdminID injects an admin ID into a context. Used in tests.
-func ContextWithAdminID(ctx context.Context, adminID string) context.Context {
-	return context.WithValue(ctx, AdminIDKey, adminID)
+// ContextWithHostID injects a host ID into a context. Used in tests.
+func ContextWithHostID(ctx context.Context, hostID string) context.Context {
+	return context.WithValue(ctx, HostIDKey, hostID)
 }

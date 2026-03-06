@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// Admin / user
+// Host / user
 
-type Admin struct {
+type Host struct {
 	ID           uuid.UUID `json:"id" db:"id"`
 	Email        string    `json:"email" db:"email"`
 	PasswordHash string    `json:"-" db:"password_hash"`
@@ -19,7 +19,7 @@ type Admin struct {
 
 type Quiz struct {
 	ID        uuid.UUID  `json:"id" db:"id"`
-	AdminID   uuid.UUID  `json:"admin_id" db:"admin_id"`
+	HostID    uuid.UUID  `json:"host_id" db:"host_id"`
 	Title     string     `json:"title" db:"title"`
 	CreatedAt time.Time  `json:"created_at" db:"created_at"`
 	Questions []Question `json:"questions,omitempty"`

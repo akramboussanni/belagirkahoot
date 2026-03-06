@@ -15,21 +15,21 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const rawFrom = (location.state as { from?: { pathname: string } })?.from?.pathname ?? "/admin";
-  const from = rawFrom.startsWith("/admin/host/") || rawFrom.startsWith("/game/") ? "/admin" : rawFrom;
+  const rawFrom = (location.state as { from?: { pathname: string } })?.from?.pathname ?? "/host";
+  const from = rawFrom.startsWith("/host/lobby/") || rawFrom.startsWith("/game/") ? "/host" : rawFrom;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const { token, admin } = await login(email, password);
-      setAuth(token, admin);
+      const { token, host } = await login(email, password);
+      setAuth(token, host);
       navigate(from, { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-        "Login failed. Check your credentials.";
+        "Échec de la connexion. Vérifiez vos identifiants.";
       setError(message);
     } finally {
       setLoading(false);
@@ -45,7 +45,7 @@ export function LoginPage() {
         {[{ delay: 0, rot: [-5, 5, -5] as [number, number, number] }, { delay: 0.5, rot: [5, -5, 5] as [number, number, number] }].map((l, i) => (
           <motion.div key={i} animate={{ y: [0, -12, 0], rotate: l.rot }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: l.delay }}>
-            
+
           </motion.div>
         ))}
       </div>
@@ -56,13 +56,13 @@ export function LoginPage() {
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="relative">
               <img src="/favicon.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" />
-              
+
             </div>
             <span className="text-3xl font-black" style={{ color: "#0136fe", textShadow: "0 0 20px rgba(1,54,254,0.4)" }}>
               {import.meta.env.VITE_APP_NAME || 'Kahoot'}
             </span>
           </div>
-          <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Admin portal</p>
+          <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Portail Hôte</p>
         </motion.div>
 
         {/* Card */}
@@ -102,13 +102,13 @@ export function LoginPage() {
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
                 onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                placeholder="admin@example.com"
+                placeholder="hôte@exemple.com"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
-                Password
+                Mot de passe
               </label>
               <input
                 type="password"
@@ -137,14 +137,14 @@ export function LoginPage() {
               }}
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}>
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? "Connexion…" : "Se connecter"}
             </motion.button>
           </form>
 
           <p className="text-center text-sm pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-            No account?{" "}
+            Pas de compte ?{" "}
             <Link to="/register" className="font-semibold transition" style={{ color: "#0136fe" }}>
-              Register
+              S'inscrire
             </Link>
           </p>
         </motion.div>

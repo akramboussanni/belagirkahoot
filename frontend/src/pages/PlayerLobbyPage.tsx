@@ -7,6 +7,9 @@ import { Users } from "lucide-react";
 import { getSessionByCode, listSessionPlayers } from "../api/sessions";
 import { useWebSocket } from "../hooks/useWebSocket";
 import type { WsMessage } from "../types";
+import { GameBackground } from "../components/GameBackground";
+import { GameCard } from "../components/GameCard";
+import { GameBrand } from "../components/GameBrand";
 
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8081";
 
@@ -98,217 +101,132 @@ export function PlayerLobbyPage() {
     "#9c27b0", "#00bcd4", "#ff9800",
   ];
 
-  // ── Loading ──
   if (sessionLoading) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-        <div className="fun-pattern" />
-        <div className="relative z-10 min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <motion.div
-              animate={{ y: [0, -15, 0], rotate: [-3, 3, -3] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              
-            </motion.div>
-            <p className="mt-4 font-medium" style={{ color: "rgba(1,54,254,0.8)" }}>Looking up game…</p>
-          </div>
+      <GameBackground>
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="font-black text-xl" style={{ color: "#0136fe" }}>Recherche du jeu…</p>
         </div>
-      </div>
+      </GameBackground>
     );
   }
 
-  // ── Not found ──
   if (sessionError || !session) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-        <div className="fun-pattern" />
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
-          <motion.div
-            className="text-center w-full max-w-sm p-8 rounded-3xl"
-            style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)",
-              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(1,54,254, 0.2)",
-            }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <img src="/favicon.png" alt="Logo" className="w-12 h-12 mx-auto object-contain drop-shadow-md" />
-            <h1 className="text-2xl font-bold text-[#0136fe] mb-2">Game not found</h1>
-            <p className="mb-6" style={{ color: "rgba(1,54,254,0.8)" }}>
-              Code <span className="font-mono font-bold" style={{ color: "#0136fe" }}>{code}</span> doesn't match any active game.
+      <GameBackground>
+        <div className="min-h-screen flex items-center justify-center px-6 text-center">
+          <GameCard className="max-w-sm">
+            <h1 className="text-3xl font-black text-[#0136fe] mb-2 uppercase tracking-tight">Oups !</h1>
+            <p className="mb-8 font-medium" style={{ color: "rgba(1,54,254,0.6)" }}>
+              Le code <span className="font-bold underline">{code}</span> n'existe pas.
             </p>
-            <motion.a
-              href="/join"
-              className="inline-block py-3 px-6 rounded-xl font-bold text-[#0136fe]"
-              style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)" }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
+              onClick={() => navigate("/join")}
+              className="w-full py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest transition-all"
+              style={{ background: "#ff6b35" }}
             >
-              ← Try a different code
-            </motion.a>
-          </motion.div>
+              Retour
+            </button>
+          </GameCard>
         </div>
-      </div>
+      </GameBackground>
     );
   }
 
-  // ── No identity ──
   if (!playerId || !playerName) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-        <div className="fun-pattern" />
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
-          <motion.div
-            className="text-center w-full max-w-sm p-8 rounded-3xl"
-            style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)",
-              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(1,54,254, 0.2)",
-            }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            
-            <h1 className="text-2xl font-bold text-[#0136fe] mb-4">Enter your name to join</h1>
-            <motion.a
-              href={`/join?code=${code}`}
-              className="inline-block py-3 px-6 rounded-xl font-bold text-[#0136fe]"
-              style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)" }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+      <GameBackground>
+        <div className="min-h-screen flex items-center justify-center px-6 text-center">
+          <GameCard className="max-w-sm">
+            <h1 className="text-2xl font-black text-[#0136fe] mb-8 uppercase tracking-tight">Identité manquante</h1>
+            <button
+              onClick={() => navigate(`/join?code=${code}`)}
+              className="w-full py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest transition-all"
+              style={{ background: "#0136fe" }}
             >
-              Join Game
-            </motion.a>
-          </motion.div>
+              Rejoindre
+            </button>
+          </GameCard>
         </div>
-      </div>
+      </GameBackground>
     );
   }
 
-  // ── Lobby ──
   return (
-    <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-      <div className="fun-pattern" />
+    <GameBackground className="items-center">
+      <div className="flex-1 flex flex-col items-center pt-24 pb-12 px-6 w-full max-w-lg mx-auto">
+        <GameBrand />
 
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-8 max-w-md mx-auto">
-        {/* Animated lantern */}
-        <motion.div
-          className="mb-8"
-          animate={{ y: [0, -15, 0], rotate: [-3, 3, -3] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        >
-          
-        </motion.div>
+        <div className="w-full space-y-8">
+          {/* Welcome Card */}
+          <GameCard className="text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 opacity-50" style={{ color: "#0136fe" }}>Vous participez en tant que</p>
+            <h2 className="text-4xl font-black tracking-tight mb-6" style={{ color: "#0136fe" }}>{playerName}</h2>
 
-        {/* Player identity */}
-        <motion.div
-          className="text-center mb-8"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
-            <h2 className="text-2xl font-bold text-[#0136fe]">Welcome!</h2>
-          </div>
-          <p className="text-xl font-bold" style={{ color: "#0136fe" }}>{playerName}</p>
-        </motion.div>
-
-        {/* Connection status / player count */}
-        {disconnected ? (
-          <motion.div
-            className="mb-8 px-8 py-4 rounded-2xl"
-            style={{ background: "rgba(244, 67, 54, 0.15)", border: "2px solid rgba(244, 67, 54, 0.4)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <p className="font-medium" style={{ color: "#f44336" }}>Disconnected. Reconnecting…</p>
-          </motion.div>
-        ) : (
-          <motion.div
-            className="mb-8 px-8 py-4 rounded-2xl flex items-center gap-3"
-            style={{
-              background: "rgba(1,54,254, 0.15)",
-              border: "2px solid rgba(1,54,254, 0.3)",
-            }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Users className="w-6 h-6" style={{ color: "#0136fe" }} />
-            <div>
-              <p className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>Players in lobby</p>
-              <motion.p
-                className="text-2xl font-bold"
-                style={{ color: "#0136fe" }}
-                key={players.length}
-                initial={{ scale: 1.3 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                {players.length}
-              </motion.p>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Waiting message + pulse dots */}
-        <motion.p
-          className="text-lg mb-8"
-          style={{ color: "#0136fe" }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          {wsReady ? "Waiting for host to start…" : "Connecting…"}
-        </motion.p>
-
-        <div className="flex gap-3 mb-10">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-4 h-4 rounded-full"
-              style={{ background: "#0136fe" }}
-              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-            />
-          ))}
-        </div>
-
-        {/* Player list */}
-        {players.length > 0 && (
-          <motion.div
-            className="w-full space-y-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            {players.map((p, i) => (
-              <motion.div
-                key={p.id}
-                className="px-4 py-3 rounded-xl flex items-center gap-3"
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "1px solid rgba(1,54,254, 0.2)",
-                }}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[#0136fe] flex-shrink-0"
-                  style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}
-                >
-                  {p.name[0]?.toUpperCase()}
+            {disconnected ? (
+              <div className="py-2 px-4 rounded-xl bg-red-50 border-2 border-red-100 flex items-center justify-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                <p className="text-xs font-black text-red-500 uppercase tracking-widest">Déconnecté…</p>
+              </div>
+            ) : (
+              <div className="py-4 px-6 rounded-2xl bg-slate-50 border-2 border-slate-100 flex items-center justify-center gap-4">
+                <Users className="w-6 h-6" style={{ color: "#0136fe" }} />
+                <div className="text-left leading-tight">
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-40" style={{ color: "#0136fe" }}>Joueurs</p>
+                  <p className="text-2xl font-black" style={{ color: "#0136fe" }}>{players.length}</p>
                 </div>
-                <p className="text-[#0136fe] font-medium flex-1">{p.name}</p>
-                {p.id === playerId && (
-                  <span className="text-sm" style={{ color: "#0136fe" }}>(You)</span>
-                )}
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+              </div>
+            )}
+          </GameCard>
+
+          {/* Status Message */}
+          <div className="text-center space-y-6">
+            <p className="text-xl font-black uppercase tracking-widest animate-pulse" style={{ color: "#0136fe" }}>
+              {wsReady ? "Prêt à jouer !" : "Connexion en cours…"}
+            </p>
+            <div className="flex justify-center gap-2">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="w-3 h-3 rounded-full"
+                  style={{ background: "#0136fe" }}
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Player List Card */}
+          {players.length > 0 && (
+            <div className="space-y-4 pt-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-center opacity-40" style={{ color: "#0136fe" }}>Qui est prêt ?</p>
+              <div className="grid grid-cols-1 gap-3">
+                {players.map((p, i) => (
+                  <motion.div
+                    key={p.id}
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 flex items-center gap-4 border-2 border-white shadow-sm"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-sm"
+                      style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}
+                    >
+                      {p.name[0]?.toUpperCase()}
+                    </div>
+                    <p className="font-bold flex-1" style={{ color: "#0136fe" }}>{p.name}</p>
+                    {p.id === playerId && (
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-[#b7f700]" style={{ color: "#0136fe" }}>Moi</span>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </GameBackground>
   );
 }

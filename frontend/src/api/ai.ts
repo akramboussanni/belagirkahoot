@@ -5,6 +5,7 @@ export interface GenerateQuizInput {
   topic: string;
   question_count: number;
   context: string;
+  url?: string;
 }
 
 export interface GenerateQuizResponse {

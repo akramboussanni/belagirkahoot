@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState, useEffect } from "react";
+import { useLayoutEffect, useRef, useEffect } from "react";
+import { motion } from "motion/react";
 import type { LeaderboardEntry } from "../types";
 
 interface Props {
@@ -37,11 +38,8 @@ export function LeaderboardDisplay({
   const initRef = useRef({ prevEntries, shown, maxEntries });
   const hasPrev = !!(prevEntries && prevEntries.length > 0);
 
-  const [visible, setVisible] = useState(hasPrev);
   useEffect(() => {
     if (hasPrev) return;
-    const t = setTimeout(() => setVisible(true), 0);
-    return () => clearTimeout(t);
   }, [hasPrev]);
 
   useLayoutEffect(() => {
@@ -88,35 +86,33 @@ export function LeaderboardDisplay({
         const isHighlighted = !!highlightPlayerId && entry.player_id === highlightPlayerId;
 
         return (
-          <div
+          <motion.div
             key={entry.player_id}
             ref={setRef(entry.player_id)}
-            style={{
-              ...(isHighlighted
-                ? { background: "rgba(1,54,254, 0.2)", border: "2px solid rgba(1,54,254, 0.5)" }
-                : { background: "rgba(255, 255, 255, 0.08)", border: "2px solid transparent" }),
-              ...(!hasPrev
-                ? { transitionDelay: `${i * 80}ms`, transition: "opacity 0.4s ease, transform 0.4s ease" }
-                : undefined),
-            }}
-            className={[
-              "rounded-xl px-4 py-3 flex items-center gap-4",
-              !hasPrev ? (visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4") : "opacity-100",
-            ].join(" ")}
+            initial={!hasPrev ? { opacity: 0, x: -20 } : false}
+            animate={!hasPrev ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: i * 0.05 }}
+            className={`rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm border-2 transition-all ${isHighlighted
+              ? "bg-white border-[#0136fe] shadow-[0_10px_30px_rgba(1,54,254,0.1)]"
+              : "bg-white/90 border-transparent hover:border-slate-100"
+              }`}
           >
             <RankBadge rank={entry.rank} />
 
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-[#0136fe] truncate">{entry.name}</p>
+              <p className="font-black text-lg tracking-tight" style={{ color: "#0136fe" }}>{entry.name}</p>
               {isHighlighted && (
-                <p className="text-xs font-semibold" style={{ color: "#0136fe" }}>(you)</p>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded bg-[#b7f700]" style={{ color: "#0136fe" }}>Vous</span>
               )}
             </div>
 
-            <span className="font-bold tabular-nums shrink-0" style={{ color: "#0136fe" }}>
-              {entry.score}
-            </span>
-          </div>
+            <div className="text-right">
+              <span className="font-black text-xl tabular-nums" style={{ color: "#0136fe" }}>
+                {entry.score}
+              </span>
+              <p className="text-[9px] font-black uppercase tracking-widest opacity-30 leading-none" style={{ color: "#0136fe" }}>pts</p>
+            </div>
+          </motion.div>
         );
       })}
     </div>

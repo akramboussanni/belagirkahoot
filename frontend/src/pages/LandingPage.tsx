@@ -1,51 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
-/* ─── Star field ─────────────────────────────────────────────────────────── */
-const STARS = Array.from({ length: 120 }, (_, i) => ({
-  id: i,
-  x: ((i * 137.508 + 23) % 100),
-  y: ((i * 97.3 + 11) % 100),
-  size: i % 7 === 0 ? 2.5 : i % 3 === 0 ? 1.8 : 1.2,
-  delay: (i * 0.23) % 4,
-  duration: 2.5 + (i % 5) * 0.7,
-}));
-
-
-/* ─── Lantern SVG ────────────────────────────────────────────────────────── */
-function Lantern({ className, glowColor = "#0136fe" }: { className?: string; glowColor?: string }) {
-  return (
-    <svg viewBox="0 0 40 72" className={className} aria-hidden="true">
-      <defs>
-        <radialGradient id={`lg-${glowColor}`} cx="50%" cy="60%" r="50%">
-          <stop offset="0%" stopColor={glowColor} stopOpacity="0.5" />
-          <stop offset="100%" stopColor={glowColor} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      {/* Glow */}
-      <ellipse cx="20" cy="44" rx="26" ry="30" fill={`url(#lg-${glowColor})`} />
-      {/* Top cap */}
-      <rect x="14" y="2" width="12" height="4" rx="2" fill={glowColor} opacity="0.8" />
-      {/* String */}
-      <line x1="20" y1="0" x2="20" y2="6" stroke={glowColor} strokeWidth="1.5" opacity="0.6" />
-      {/* Body */}
-      <rect x="8" y="12" width="24" height="36" rx="4" fill={glowColor} opacity="0.15" stroke={glowColor} strokeWidth="1" strokeOpacity="0.6" />
-      {/* Ribs */}
-      {[18, 26, 34].map((y) => (
-        <line key={y} x1="8" y1={y} x2="32" y2={y} stroke={glowColor} strokeWidth="0.8" strokeOpacity="0.4" />
-      ))}
-      {/* Inner glow */}
-      <ellipse cx="20" cy="30" rx="8" ry="10" fill={glowColor} opacity="0.25" />
-      {/* Bottom fringe */}
-      {[10, 15, 20, 25, 30].map((x) => (
-        <line key={x} x1={x} y1="48" x2={x - 1} y2="56" stroke={glowColor} strokeWidth="1" strokeOpacity="0.5" />
-      ))}
-      {/* Bottom cap */}
-      <rect x="12" y="48" width="16" height="4" rx="2" fill={glowColor} opacity="0.7" />
-    </svg>
-  );
-}
 
 /* ─── Geometric ornament ─────────────────────────────────────────────────── */
 function StarOrnament({ size = 32, color = "#0136fe", opacity = 0.3 }: { size?: number; color?: string; opacity?: number }) {
@@ -87,38 +43,8 @@ export function LandingPage() {
   const moonY = useTransform(scrollYProgress, [0, 1], [0, -80]);
   const moonOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
-  // Noise grain canvas
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const W = 256, H = 256;
-    canvas.width = W;
-    canvas.height = H;
-    const img = ctx.createImageData(W, H);
-    for (let i = 0; i < img.data.length; i += 4) {
-      const v = Math.random() * 255;
-      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-      img.data[i + 3] = 18;
-    }
-    ctx.putImageData(img, 0, 0);
-  }, []);
-
   return (
     <div style={{ background: "#a5de00", color: "#0136fe", minHeight: "100vh", overflowX: "hidden" }}>
-      {/* Grain overlay */}
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        style={{
-          position: "fixed", inset: 0, width: "100%", height: "100%",
-          backgroundRepeat: "repeat", opacity: 0.4, pointerEvents: "none",
-          zIndex: 1, mixBlendMode: "overlay",
-        }}
-      />
-
       {/* ── NAV ───────────────────────────────────────────────────────────── */}
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
@@ -128,7 +54,7 @@ export function LandingPage() {
           position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
           padding: "20px 40px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: "linear-gradient(to bottom, rgba(6,9,26,0.9) 0%, transparent 100%)",
+          background: "linear-gradient(to bottom, #a5de00 0%, transparent 100%)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -158,7 +84,7 @@ export function LandingPage() {
             onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = "rgba(1,54,254,0.18)"; }}
             onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "rgba(1,54,254,0.08)"; }}
           >
-            Join Game
+            Rejoindre
           </button>
           <button
             onClick={() => navigate("/login")}
@@ -173,7 +99,7 @@ export function LandingPage() {
             onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = "#ffd700"; }}
             onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "#0136fe"; }}
           >
-            Host a Quiz
+            Organiser
           </button>
         </div>
       </motion.nav>
@@ -187,32 +113,6 @@ export function LandingPage() {
           overflow: "hidden", padding: "120px 24px 80px",
         }}
       >
-        {/* Background gradient */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(30,20,80,0.8) 0%, rgba(6,9,26,0) 70%)",
-          pointerEvents: "none",
-        }} />
-
-        {/* Stars */}
-        {STARS.map(s => (
-          <motion.div
-            key={s.id}
-            style={{
-              position: "absolute",
-              left: `${s.x}%`,
-              top: `${s.y}%`,
-              width: s.size,
-              height: s.size,
-              borderRadius: "50%",
-              background: s.id % 11 === 0 ? "#0136fe" : "white",
-              pointerEvents: "none",
-            }}
-            animate={{ opacity: [0.2, 1, 0.2] }}
-            transition={{ duration: s.duration, delay: s.delay, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
-
         {/* Moon */}
         <motion.div
           style={{ position: "absolute", top: "8%", right: "12%", y: moonY, opacity: moonOpacity }}
@@ -223,26 +123,6 @@ export function LandingPage() {
             transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
           >
             <img src="/favicon.png" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" />
-          </motion.div>
-        </motion.div>
-
-        {/* Lanterns */}
-        <motion.div style={{ position: "absolute", top: "15%", left: "6%", opacity: 0.7 }}
-          initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 0.7 }} transition={{ delay: 0.8, duration: 1 }}>
-          <motion.div animate={{ rotate: [-3, 3, -3] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
-            <Lantern className="w-10 h-16" />
-          </motion.div>
-        </motion.div>
-        <motion.div style={{ position: "absolute", top: "10%", left: "16%", opacity: 0.5 }}
-          initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 0.5 }} transition={{ delay: 1, duration: 1 }}>
-          <motion.div animate={{ rotate: [3, -3, 3] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-            <Lantern className="w-7 h-12" glowColor="#ff6b35" />
-          </motion.div>
-        </motion.div>
-        <motion.div style={{ position: "absolute", top: "20%", right: "6%", opacity: 0.5 }}
-          initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 0.5 }} transition={{ delay: 1.2, duration: 1 }}>
-          <motion.div animate={{ rotate: [2, -4, 2] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}>
-            <Lantern className="w-8 h-14" glowColor="#ff6b35" />
           </motion.div>
         </motion.div>
 
@@ -258,7 +138,7 @@ export function LandingPage() {
             color: "#0136fe", textTransform: "uppercase",
             fontFamily: "'Montserrat', sans-serif",
           }}>
-            Ready to Play
+            Prêt à jouer
           </span>
           <StarOrnament size={16} opacity={0.7} />
         </motion.div>
@@ -279,7 +159,7 @@ export function LandingPage() {
               marginBottom: 0,
             }}
           >
-            CELEBRATE
+            CÉLÉBREZ
             <br />
             <span style={{
               WebkitTextStroke: "2px #0136fe",
@@ -304,8 +184,8 @@ export function LandingPage() {
               marginTop: 8,
             }}
           >
-            QUIZ YOUR
-            <br />WORLD.
+            VOTRE MONDE
+            <br />EN QUIZ.
           </motion.h2>
 
           <motion.p
@@ -323,8 +203,8 @@ export function LandingPage() {
               margin: "28px auto 0",
             }}
           >
-            A live multiplayer quiz game built for {import.meta.env.VITE_APP_NAME || 'Kahoot'} nights.
-            Challenge friends, test your knowledge, and compete in real time.
+            Un jeu de quiz multijoueur en direct conçu pour les soirées {import.meta.env.VITE_APP_NAME || 'Kahoot'}.
+            Défiez vos amis, testez vos connaissances et participez en temps réel.
           </motion.p>
 
           {/* CTAs */}
@@ -357,7 +237,7 @@ export function LandingPage() {
                 b.style.boxShadow = "0 0 40px rgba(1,54,254,0.35), 0 8px 24px rgba(0,0,0,0.4)";
               }}
             >
-              Join a Game
+              Rejoindre une partie
             </button>
             <button
               onClick={() => navigate("/login")}
@@ -367,7 +247,7 @@ export function LandingPage() {
                 color: "#0136fe", fontWeight: 700, fontSize: 15,
                 letterSpacing: "0.06em", cursor: "pointer",
                 fontFamily: "'Montserrat', sans-serif",
-                border: "1.5px solid rgba(250,243,224,0.25)",
+                border: "1.5px solid rgba(1,54,254,0.25)",
                 transition: "all 0.2s",
                 textTransform: "uppercase",
               }}
@@ -378,11 +258,11 @@ export function LandingPage() {
               }}
               onMouseLeave={e => {
                 const b = e.currentTarget;
-                b.style.borderColor = "rgba(250,243,224,0.25)";
-                b.style.color = "#faf3e0";
+                b.style.borderColor = "rgba(1,54,254,0.25)";
+                b.style.color = "#0136fe";
               }}
             >
-              Host a Quiz
+              Organiser un quiz
             </button>
           </motion.div>
         </div>
@@ -399,298 +279,12 @@ export function LandingPage() {
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
           >
-            <span style={{ fontSize: 10, letterSpacing: "0.25em", color: "rgba(250,243,224,0.3)", fontFamily: "'Montserrat', sans-serif" }}>SCROLL</span>
+            <span style={{ fontSize: 10, letterSpacing: "0.25em", color: "rgba(1,54,254,0.5)", fontFamily: "'Montserrat', sans-serif" }}>DÉFILER</span>
             <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, rgba(1,54,254,0.5), transparent)" }} />
           </motion.div>
         </motion.div>
       </section>
 
-      {/* ── FEATURES ──────────────────────────────────────────────────────── */}
-      <section style={{ padding: "80px 24px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 2 }}>
-        <GeoDivider />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7 }}
-          style={{ textAlign: "center", margin: "52px 0 56px" }}
-        >
-          <p style={{
-            fontSize: 11, letterSpacing: "0.3em", fontWeight: 600,
-            color: "#0136fe", textTransform: "uppercase",
-            fontFamily: "'Montserrat', sans-serif", marginBottom: 16,
-          }}>
-            Why {import.meta.env.VITE_APP_NAME || 'Kahoot'}
-          </p>
-          <h2 style={{
-            fontFamily: "'Montserrat', sans-serif",
-            fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            color: "#0136fe", letterSpacing: "-0.02em", lineHeight: 1.1,
-          }}>
-            Everything Kahoot charges for.<br />
-            <span style={{ color: "#0136fe" }}>Free. Forever.</span>
-          </h2>
-        </motion.div>
-
-        {/* Kahoot comparison hero card */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7 }}
-          style={{
-            marginBottom: 32,
-            borderRadius: 20,
-            overflow: "hidden",
-            border: "1px solid rgba(1,54,254,0.15)",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-          }}
-        >
-          {/* Kahoot column */}
-          <div style={{
-            padding: "40px 44px",
-            background: "rgba(255,255,255,0.02)",
-            borderRight: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            <p style={{
-              fontFamily: "'Montserrat', sans-serif", fontSize: 11,
-              letterSpacing: "0.25em", fontWeight: 700, color: "rgba(250,243,224,0.3)",
-              textTransform: "uppercase", marginBottom: 20,
-            }}>
-              Kahoot
-            </p>
-            {[
-              "Up to 10 players free",
-              "Paid plan for more players",
-              "No {import.meta.env.VITE_APP_NAME || 'Kahoot'} theme",
-              "Generic quiz experience",
-              "AI quiz generation — paid only",
-            ].map((item) => (
-              <div key={item} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="7.5" stroke="rgba(244,67,54,0.4)" />
-                  <path d="M5 5l6 6M11 5l-6 6" stroke="#f44336" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-                <span style={{
-                  fontFamily: "'Montserrat', sans-serif", fontSize: 14,
-                  color: "rgba(250,243,224,0.4)", fontWeight: 400,
-                }}>
-                  {item}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* {import.meta.env.VITE_APP_NAME || 'Kahoot'} column */}
-          <div style={{
-            padding: "40px 44px",
-            background: "rgba(1,54,254,0.04)",
-            position: "relative",
-            overflow: "hidden",
-          }}>
-            <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: 2,
-              background: "linear-gradient(to right, #0136fe, #ff6b35)",
-            }} />
-            <p style={{
-              fontFamily: "'Montserrat', sans-serif", fontSize: 11,
-              letterSpacing: "0.25em", fontWeight: 700, color: "#0136fe",
-              textTransform: "uppercase", marginBottom: 20,
-            }}>
-              {import.meta.env.VITE_APP_NAME || 'Kahoot'}
-            </p>
-            {[
-              "Unlimited players, always free",
-              "No account needed to play",
-              "Built for {import.meta.env.VITE_APP_NAME || 'Kahoot'}",
-              "Real-time, speed-scored competition",
-              "AI-powered quiz generation — free",
-            ].map((item) => (
-              <div key={item} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="7.5" stroke="rgba(76,175,80,0.5)" />
-                  <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#4caf50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span style={{
-                  fontFamily: "'Montserrat', sans-serif", fontSize: 14,
-                  color: "rgba(1,54,254,0.9)", fontWeight: 500,
-                }}>
-                  {item}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Feature strip — 3 compact items */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, background: "rgba(255,255,255,0.05)", borderRadius: 16, overflow: "hidden" }}>
-          {[
-            {
-              label: "Real-Time",
-              title: "Live leaderboards, zero lag",
-              body: "WebSocket-powered. Every answer, score update, and reveal happens instantly across all connected players.",
-            },
-            {
-              label: "{import.meta.env.VITE_APP_NAME || 'Kahoot'}-Themed",
-              title: "Designed for the occasion",
-              body: "Prayer arc transitions, Kahoot moon motifs, and golden design tokens — built with intention, not as an afterthought.",
-            },
-            {
-              label: "Speed Scoring",
-              title: "Fast answers win more",
-              body: "Points scale with response time. Know the answer AND be quick. Every question reshuffles the leaderboard.",
-            },
-            {
-              label: "AI-Powered",
-              title: "Generate quizzes instantly",
-              body: "Describe your topic and let AI build the questions. Review, edit, and launch — quiz creation in seconds, not minutes.",
-            },
-          ].map((f, i) => (
-            <motion.div
-              key={f.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              style={{
-                padding: "32px 28px",
-                background: "rgba(6,9,26,0.95)",
-              }}
-            >
-              <span style={{
-                display: "inline-block",
-                fontFamily: "'Montserrat', sans-serif", fontSize: 10,
-                letterSpacing: "0.25em", fontWeight: 700,
-                color: "#0136fe", textTransform: "uppercase",
-                marginBottom: 12,
-                padding: "3px 10px",
-                border: "1px solid rgba(1,54,254,0.25)",
-                borderRadius: 4,
-              }}>
-                {f.label}
-              </span>
-              <h3 style={{
-                fontFamily: "'Montserrat', sans-serif", fontWeight: 700,
-                fontSize: 16, color: "#0136fe", marginBottom: 10,
-                letterSpacing: "-0.01em", lineHeight: 1.3,
-              }}>
-                {f.title}
-              </h3>
-              <p style={{
-                fontFamily: "'Montserrat', sans-serif", fontSize: 13,
-                color: "rgba(250,243,224,0.45)", lineHeight: 1.7,
-              }}>
-                {f.body}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
-      <section style={{
-        padding: "80px 24px",
-        background: "linear-gradient(to bottom, transparent, rgba(20,10,60,0.3), transparent)",
-        position: "relative", zIndex: 2,
-      }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <GeoDivider />
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7 }}
-            style={{ textAlign: "center", margin: "52px 0 64px" }}
-          >
-            <p style={{
-              fontSize: 11, letterSpacing: "0.3em", fontWeight: 600,
-              color: "#0136fe", textTransform: "uppercase",
-              fontFamily: "'Montserrat', sans-serif", marginBottom: 16,
-            }}>
-              How it works
-            </p>
-            <h2 style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              color: "#0136fe", letterSpacing: "-0.02em", lineHeight: 1.1,
-            }}>
-              Three steps to quiz night.
-            </h2>
-          </motion.div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {[
-              {
-                n: "01",
-                title: "Create your quiz",
-                body: "Sign in as a host. Build a quiz with custom questions, multiple-choice options, and time limits. It takes minutes.",
-                side: "left",
-              },
-              {
-                n: "02",
-                title: "Start a session",
-                body: "Launch a live game session. Share the 6-digit code with your players — no accounts, no downloads, just a link.",
-                side: "right",
-              },
-              {
-                n: "03",
-                title: "Play, compete, celebrate",
-                body: "Questions appear in real time. The prayer arc counts you in. Scores update live. Crown your {import.meta.env.VITE_APP_NAME || 'Kahoot'} champion.",
-                side: "left",
-              },
-            ].map((step, i) => (
-              <motion.div
-                key={step.n}
-                initial={{ opacity: 0, x: step.side === "left" ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.7, delay: 0.1 }}
-                style={{
-                  display: "flex",
-                  gap: 40,
-                  alignItems: "flex-start",
-                  justifyContent: step.side === "right" ? "flex-end" : "flex-start",
-                  padding: "40px 0",
-                  borderBottom: i < 2 ? "1px solid rgba(1,54,254,0.08)" : "none",
-                  flexDirection: step.side === "right" ? "row-reverse" : "row",
-                }}
-              >
-                <div style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 900,
-                  fontSize: "clamp(4rem, 10vw, 8rem)",
-                  lineHeight: 1,
-                  letterSpacing: "-0.04em",
-                  WebkitTextStroke: "1px rgba(1,54,254,0.25)",
-                  color: "transparent",
-                  flexShrink: 0,
-                  userSelect: "none",
-                }}>
-                  {step.n}
-                </div>
-                <div style={{ maxWidth: 480, paddingTop: 16 }}>
-                  <h3 style={{
-                    fontFamily: "'Montserrat', sans-serif", fontWeight: 800,
-                    fontSize: "clamp(1.3rem, 3vw, 1.9rem)", color: "#0136fe",
-                    letterSpacing: "-0.02em", marginBottom: 14,
-                  }}>
-                    {step.title}
-                  </h3>
-                  <p style={{
-                    fontFamily: "'Montserrat', sans-serif", fontSize: 15,
-                    color: "rgba(1,54,254,0.7)", lineHeight: 1.8,
-                  }}>
-                    {step.body}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── CTA FOOTER ────────────────────────────────────────────────────── */}
       <section style={{ padding: "100px 24px 80px", textAlign: "center", position: "relative", zIndex: 2, overflow: "hidden" }}>
@@ -722,15 +316,15 @@ export function LandingPage() {
             lineHeight: 1.05,
             marginBottom: 20,
           }}>
-            Ready to play?
+            Prêt à jouer ?
           </h2>
 
           <p style={{
             fontFamily: "'Montserrat', sans-serif",
-            fontSize: 16, color: "rgba(250,243,224,0.5)",
+            fontSize: 16, color: "rgba(1,54,254,0.8)",
             lineHeight: 1.7, maxWidth: 440, margin: "0 auto 44px",
           }}>
-            {import.meta.env.VITE_APP_NAME || 'Kahoot'} Mubarak. Enter a game code to join your host's session.
+            {import.meta.env.VITE_APP_NAME || 'Kahoot'} Moubarak. Entrez un code de jeu pour rejoindre la session de votre hôte.
           </p>
 
           <button
@@ -756,7 +350,7 @@ export function LandingPage() {
               b.style.boxShadow = "0 0 60px rgba(1,54,254,0.4), 0 12px 40px rgba(0,0,0,0.5)";
             }}
           >
-            Join a Game
+            Rejoindre une partie
           </button>
         </motion.div>
 
@@ -766,27 +360,10 @@ export function LandingPage() {
           <div style={{ marginTop: 28, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
             <p style={{
               fontFamily: "'Montserrat', sans-serif",
-              fontSize: 12, color: "rgba(250,243,224,0.2)",
-              letterSpacing: "0.1em",
-            }}>
-              Built by{" "}
-              <a
-                href="https://github.com/HassanA01"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "rgba(1,54,254,0.5)", textDecoration: "none", fontWeight: 600 }}
-                onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = "#0136fe"; }}
-                onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = "rgba(1,54,254,0.5)"; }}
-              >
-                HassanA01
-              </a>
-            </p>
-            <p style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: 11, color: "rgba(250,243,224,0.15)",
+              fontSize: 11, color: "rgba(1,54,254,0.6)",
               letterSpacing: "0.08em",
             }}>
-              © {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME || 'Kahoot'}. All rights reserved.
+              © {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME || 'Kahoot'}. Tous droits réservés.
             </p>
           </div>
         </div>

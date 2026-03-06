@@ -16,9 +16,9 @@ vi.mock("../hooks/useWebSocket", () => ({
 
 function renderHostGame(code = "123456") {
   return render(
-    <MemoryRouter initialEntries={[`/admin/game/${code}`]}>
+    <MemoryRouter initialEntries={[`/host/game/${code}`]}>
       <Routes>
-        <Route path="/admin/game/:code" element={<HostGamePage />} />
+        <Route path="/host/game/:code" element={<HostGamePage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -51,7 +51,7 @@ describe("HostGamePage", () => {
 
   it("shows waiting spinner before first question", () => {
     renderHostGame();
-    expect(screen.getByText(/starting game/i)).toBeInTheDocument();
+    expect(screen.getByText(/démarrage du jeu/i)).toBeInTheDocument();
   });
 
   it("renders question when question message received", () => {
@@ -81,7 +81,7 @@ describe("HostGamePage", () => {
         },
       }),
     );
-    expect(screen.getByText(/leaderboard coming up/i)).toBeInTheDocument();
+    expect(screen.getByText(/classement à venir/i)).toBeInTheDocument();
   });
 
   it("shows leaderboard and next question button", () => {
@@ -100,7 +100,7 @@ describe("HostGamePage", () => {
     );
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Bob")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /next question/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /question suivante/i })).toBeInTheDocument();
   });
 
   it("shows arc transition then sends next_question after animation", () => {
@@ -115,7 +115,7 @@ describe("HostGamePage", () => {
         }),
       );
 
-      const btn = screen.getByRole("button", { name: /next question/i });
+      const btn = screen.getByRole("button", { name: /question suivante/i });
       act(() => { fireEvent.click(btn); });
 
       // Arc transition is now showing — prayer labels visible, send not yet called
@@ -181,14 +181,14 @@ describe("HostGamePage", () => {
         },
       }),
     );
-    expect(screen.getByText(/game over/i)).toBeInTheDocument();
+    expect(screen.getByText(/jeu terminé/i)).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("2400")).toBeInTheDocument();
-    // Back to Dashboard is the only action button on the podium screen.
-    expect(screen.getByRole("button", { name: /back to dashboard/i })).toBeInTheDocument();
+    // Retour au tableau de bord is the only action button on the podium screen.
+    expect(screen.getByRole("button", { name: /retour au tableau de bord/i })).toBeInTheDocument();
   });
 
-  it("limits admin podium to top 3 players only", () => {
+  it("limits host podium to top 3 players only", () => {
     renderHostGame();
     act(() =>
       capturedOnMessage!({
@@ -207,7 +207,7 @@ describe("HostGamePage", () => {
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Bob")).toBeInTheDocument();
     expect(screen.getByText("Carol")).toBeInTheDocument();
-    // 4th and 5th players should NOT appear on the admin podium
+    // 4th and 5th players should NOT appear on the host podium
     expect(screen.queryByText("Dave")).not.toBeInTheDocument();
     expect(screen.queryByText("Eve")).not.toBeInTheDocument();
   });

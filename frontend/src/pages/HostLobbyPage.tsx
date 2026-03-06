@@ -2,13 +2,15 @@ import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { Users, Copy, Check } from "lucide-react";
+import { Users } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 import { getSessionByCode, listSessionPlayers, startSession } from "../api/sessions";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
 import type { WsMessage, GamePlayer } from "../types";
+import { GameBackground } from "../components/GameBackground";
+import { GameCard } from "../components/GameCard";
 
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8081";
 
@@ -68,7 +70,7 @@ export function HostLobbyPage() {
       const payload = msg.payload as { player_id: string };
       setWsEvents((prev) => [...prev, { type: "left", player_id: payload.player_id, name: "" }]);
     } else if (msg.type === "game_started") {
-      navigate(`/admin/game/${code}`);
+      navigate(`/host/game/${code}`);
     }
   }, [code, navigate]);
 
@@ -97,139 +99,137 @@ export function HostLobbyPage() {
 
   if (isError) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-        <div className="fun-pattern" />
+      <GameBackground>
         <div className="relative z-10 min-h-screen flex items-center justify-center">
-          <p style={{ color: "#f44336" }}>Session not found.</p>
+          <GameCard className="text-center">
+            <h1 className="text-4xl font-black text-[#0136fe] mb-2">Oops !</h1>
+            <p className="font-bold text-slate-500">Session non trouvée.</p>
+            <button onClick={() => navigate("/host")} className="mt-6 px-6 py-3 rounded-2xl bg-[#0136fe] text-white font-black uppercase tracking-widest shadow-xl">
+              Retour
+            </button>
+          </GameCard>
         </div>
-      </div>
+      </GameBackground>
     );
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
-      <div className="fun-pattern" />
+    <GameBackground className="flex flex-col items-center">
 
-      <div className="relative z-10 min-h-screen flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 max-w-2xl mx-auto">
-        {/* Animated lanterns */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-32">
-          {[{ delay: 0 }, { delay: 0.5 }].map((l, i) => (
-            <motion.div key={i} animate={{ y: [0, -10, 0], rotate: [i === 0 ? -5 : 5, i === 0 ? 5 : -5, i === 0 ? -5 : 5] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: l.delay }}>
-              
-            </motion.div>
-          ))}
+      {/* Top Join Pill */}
+      <motion.div
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="fixed top-6 z-20"
+      >
+        <div className="bg-white px-8 py-3 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] border-4 border-white flex items-center gap-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: "rgba(1,54,254,0.4)" }}>Rejoindre sur</p>
+          <p className="font-black text-lg tracking-tight" style={{ color: "#0136fe" }}>{window.location.host}/join</p>
         </div>
+      </motion.div>
 
-        <div className="w-full mt-16 space-y-6">
-          {/* Room code */}
-          <motion.div className="text-center" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
-              <p className="text-sm font-medium uppercase tracking-widest" style={{ color: "rgba(1,54,254,0.8)" }}>Room Code</p>
+      <div className="relative z-10 w-full max-w-5xl px-6 py-32 flex flex-col items-center">
+
+        {/* Hero Instruction Area - Now Horizontal and Integrated */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full bg-white rounded-[4rem] p-10 sm:p-16 shadow-[0_30px_80px_rgba(0,0,0,0.06)] border-8 border-white flex flex-col lg:flex-row items-center justify-between gap-12 mb-16"
+        >
+          <div className="flex flex-col items-center lg:items-start space-y-2">
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-black uppercase tracking-[0.4em]" style={{ color: "rgba(1,54,254,0.3)" }}>Code PIN du jeu</p>
+              <div className={`w-2.5 h-2.5 rounded-full ${wsReady ? "bg-[#0136fe]" : "bg-yellow-500"} animate-pulse`} />
             </div>
-            <h1 className="text-5xl sm:text-8xl font-black tracking-widest" style={{
-              color: "#0136fe",
-              textShadow: "0 0 30px rgba(1,54,254,0.6), 0 4px 20px rgba(0,0,0,0.5)",
-            }}>
+            <h1 className="text-8xl sm:text-[11rem] font-black leading-[0.85] tracking-tighter" style={{ color: "#0136fe" }}>
               {code}
             </h1>
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <span className={`w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
-              <p className="text-sm" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
-                {wsReady ? "Connected" : "Connecting…"}
-              </p>
-            </div>
-          </motion.div>
+          </div>
 
-          {/* Join URL */}
-          <motion.div
-            className="p-4 rounded-2xl flex items-center gap-3"
-            style={{ background: "rgba(1,54,254,0.08)", border: "1px solid rgba(1,54,254,0.2)" }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            <p className="font-mono text-sm flex-1 truncate" style={{ color: "rgba(1,54,254,0.8)" }}>{joinUrl}</p>
-            <motion.button onClick={handleCopyUrl} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: copied ? "rgba(76,175,80,0.2)" : "rgba(1,54,254,0.2)", color: copied ? "#4caf50" : "#0136fe" }}>
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </motion.button>
-          </motion.div>
-
-          {/* QR code */}
-          <motion.div
-            className="flex justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.25 }}
-          >
-            <div
-              className="p-4 rounded-2xl inline-block"
-              style={{ background: "white" }}
-            >
+          <div className="flex flex-col items-center gap-4 shrink-0">
+            <div className="p-3 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100 shadow-inner group transition-transform hover:scale-105">
               <QRCodeSVG
                 value={joinUrl}
-                size={200}
-                level="M"
-                data-testid="lobby-qr-code"
+                size={160}
+                level="H"
               />
             </div>
-          </motion.div>
+            <button
+              onClick={handleCopyUrl}
+              className="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+              style={{ background: copied ? "#abed00" : "rgba(1,54,254,0.05)", color: "#0136fe" }}
+            >
+              {copied ? "Lien copié !" : "Copier le lien"}
+            </button>
+          </div>
+        </motion.div>
 
-          {/* Player count */}
-          <motion.div className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <Users className="w-5 h-5" style={{ color: "#0136fe" }} />
-            <h2 className="text-lg font-bold text-[#0136fe]">
-              Players <span style={{ color: "#0136fe" }}>({players.length})</span>
+        {/* Players Area - Organic Flow */}
+        <div className="w-full space-y-8 pb-32">
+          <div className="flex items-center justify-center gap-3">
+            <Users className="w-6 h-6" style={{ color: "#0136fe" }} />
+            <h2 className="text-2xl font-black text-center" style={{ color: "#0136fe" }}>
+              Joueurs <span className="opacity-30">({players.length})</span>
             </h2>
-          </motion.div>
+          </div>
 
-          {/* Player list */}
           {players.length === 0 ? (
-            <motion.div className="rounded-2xl p-10 text-center"
-              style={{ background: "rgba(1,54,254,0.05)", border: "2px dashed rgba(1,54,254,0.2)" }}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <p style={{ color: "rgba(1,54,254,0.7)" }}>Waiting for players to join…</p>
+            <motion.div
+              className="py-20 rounded-[3.5rem] border-4 border-dashed border-white/40 flex flex-col items-center justify-center"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            >
+              <div className="w-16 h-16 rounded-full border-4 border-white/20 flex items-center justify-center mb-6">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-4 h-4 rounded-full" style={{ background: "#0136fe" }}
+                />
+              </div>
+              <p className="text-lg font-black opacity-30 uppercase tracking-widest" style={{ color: "#0136fe" }}>En attente de génies...</p>
             </motion.div>
           ) : (
-            <motion.div className="space-y-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
               {players.map((player, i) => (
-                <motion.div key={player.id}
-                  className="px-4 py-3 rounded-xl flex items-center gap-3"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(1,54,254,0.15)" }}
-                  initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[#0136fe] flex-shrink-0"
+                <motion.div
+                  key={player.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-white rounded-[2rem] p-5 flex flex-col items-center gap-3 shadow-lg shadow-black/5 border-2 border-white group hover:-translate-y-1 transition-transform"
+                >
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-md"
                     style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}>
                     {player.name[0]?.toUpperCase()}
                   </div>
-                  <span className="font-medium text-[#0136fe]">{player.name}</span>
+                  <span className="font-black text-sm truncate w-full text-center" style={{ color: "#0136fe" }}>{player.name}</span>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           )}
+        </div>
 
-          {/* Start button */}
+        {/* Start Button Area - Fixed Float */}
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center bg-gradient-to-t from-[#b7f700] via-[#b7f700]/90 to-transparent pointer-events-none z-30">
           <motion.button
             onClick={() => startMutation.mutate()}
             disabled={players.length === 0 || startMutation.isPending}
-            className="w-full py-4 rounded-xl font-bold text-lg disabled:cursor-not-allowed"
+            className="w-full max-w-md py-6 rounded-full font-black text-xl shadow-[0_20px_50px_rgba(1,54,254,0.3)] uppercase tracking-widest transition-all pointer-events-auto active:scale-95 disabled:opacity-50"
             style={{
-              background: players.length > 0 && !startMutation.isPending
-                ? "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)"
-                : "rgba(255,107,53,0.3)",
-              color: "#0136fe",
-              boxShadow: players.length > 0 ? "0 8px 30px rgba(255,107,53,0.4)" : "none",
+              background: players.length > 0 && !startMutation.isPending ? "#0136fe" : "rgba(1, 54, 254, 0.2)",
+              color: "#ffffff",
             }}
-            whileHover={players.length > 0 ? { scale: 1.02 } : {}}
-            whileTap={players.length > 0 ? { scale: 0.98 } : {}}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-            {startMutation.isPending ? "Starting…" : "Start Game 🚀"}
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+          >
+            {startMutation.isPending ? "Démarrage..." : "Démarrer le jeu 🚀"}
           </motion.button>
-
           {startMutation.isError && (
-            <p className="text-center text-sm" style={{ color: "#f44336" }}>Failed to start game. Try again.</p>
+            <p className="pointer-events-auto absolute -top-4 left-1/2 -translate-x-1/2 text-[10px] font-black text-red-500 uppercase tracking-widest bg-white px-4 py-1 rounded-full shadow-sm">
+              Échec du lancement
+            </p>
           )}
         </div>
       </div>
-    </div>
+    </GameBackground>
   );
 }

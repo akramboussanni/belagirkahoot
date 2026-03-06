@@ -11,10 +11,10 @@ import (
 
 const testSecret = "test-secret-32-bytes-long-enough"
 
-func makeToken(t *testing.T, adminID string, secret string, exp time.Time) string {
+func makeToken(t *testing.T, hostID string, secret string, exp time.Time) string {
 	t.Helper()
 	claims := jwt.MapClaims{
-		"sub": adminID,
+		"sub": hostID,
 		"exp": exp.Unix(),
 		"iat": time.Now().Unix(),
 	}
@@ -28,9 +28,9 @@ func makeToken(t *testing.T, adminID string, secret string, exp time.Time) strin
 
 func TestRequireAuth(t *testing.T) {
 	sentinel := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		adminID := GetAdminID(r.Context())
+		hostID := GetHostID(r.Context())
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(adminID))
+		_, _ = w.Write([]byte(hostID))
 	})
 
 	handler := RequireAuth(testSecret)(sentinel)
@@ -65,7 +65,7 @@ func TestRequireAuth(t *testing.T) {
 	})
 
 	t.Run("token signed with wrong secret", func(t *testing.T) {
-		tok := makeToken(t, "admin-123", "wrong-secret", time.Now().Add(time.Hour))
+		tok := makeToken(t, "host-123", "wrong-secret", time.Now().Add(time.Hour))
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+tok)
 		w := httptest.NewRecorder()
@@ -76,7 +76,7 @@ func TestRequireAuth(t *testing.T) {
 	})
 
 	t.Run("expired token", func(t *testing.T) {
-		tok := makeToken(t, "admin-123", testSecret, time.Now().Add(-time.Hour))
+		tok := makeToken(t, "host-123", testSecret, time.Now().Add(-time.Hour))
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+tok)
 		w := httptest.NewRecorder()
@@ -86,8 +86,8 @@ func TestRequireAuth(t *testing.T) {
 		}
 	})
 
-	t.Run("valid token passes admin_id to context", func(t *testing.T) {
-		tok := makeToken(t, "admin-abc", testSecret, time.Now().Add(time.Hour))
+	t.Run("valid token passes host_id to context", func(t *testing.T) {
+		tok := makeToken(t, "host-abc", testSecret, time.Now().Add(time.Hour))
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+tok)
 		w := httptest.NewRecorder()
@@ -95,8 +95,8 @@ func TestRequireAuth(t *testing.T) {
 		if w.Code != http.StatusOK {
 			t.Errorf("expected 200, got %d", w.Code)
 		}
-		if w.Body.String() != "admin-abc" {
-			t.Errorf("expected admin-abc in body, got %q", w.Body.String())
+		if w.Body.String() != "host-abc" {
+			t.Errorf("expected host-abc in body, got %q", w.Body.String())
 		}
 	})
 }
