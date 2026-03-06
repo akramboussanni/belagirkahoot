@@ -48,11 +48,11 @@ export function QuizListPage() {
 
       {/* Header */}
       <motion.div className="flex items-center justify-between mb-8" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-3xl font-black text-white">Game Library</h2>
+        <h2 className="text-3xl font-black text-[#0136fe]">Game Library</h2>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Link to="/admin/quizzes/new"
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", color: "white", boxShadow: "0 4px 20px rgba(255,107,53,0.4)" }}>
+            style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", color: "#0136fe", boxShadow: "0 4px 20px rgba(255,107,53,0.4)" }}>
             <Plus className="w-4 h-4" />
             New Quiz
           </Link>
@@ -63,7 +63,7 @@ export function QuizListPage() {
       {isLoading && (
         <div className="flex gap-3 justify-center py-12">
           {[0, 1, 2].map((i) => (
-            <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#f5c842" }}
+            <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#0136fe" }}
               animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }} />
           ))}
@@ -78,10 +78,10 @@ export function QuizListPage() {
 
       {!isLoading && !isError && quizzes.length === 0 && (
         <motion.div className="text-center py-16 rounded-2xl"
-          style={{ background: "rgba(245,200,66,0.05)", border: "2px dashed rgba(245,200,66,0.3)" }}
+          style={{ background: "rgba(1,54,254,0.05)", border: "2px dashed rgba(1,54,254,0.3)" }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <p className="text-lg text-white mb-2">No quizzes yet.</p>
-          <Link to="/admin/quizzes/new" className="text-sm font-semibold" style={{ color: "#f5c842" }}>
+          <p className="text-lg text-[#0136fe] mb-2">No quizzes yet.</p>
+          <Link to="/admin/quizzes/new" className="text-sm font-semibold" style={{ color: "#0136fe" }}>
             Create your first quiz →
           </Link>
         </motion.div>
@@ -95,18 +95,18 @@ export function QuizListPage() {
               className="p-6 rounded-2xl relative overflow-hidden group cursor-pointer"
               style={{
                 background: "linear-gradient(135deg, rgba(42,20,66,0.8) 0%, rgba(30,15,50,0.9) 100%)",
-                border: "1px solid rgba(245,200,66,0.2)",
+                border: "1px solid rgba(1,54,254,0.2)",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              whileHover={{ boxShadow: "0 8px 30px rgba(245,200,66,0.2)" }}>
+              whileHover={{ boxShadow: "0 8px 30px rgba(1,54,254,0.2)" }}>
 
               {/* Quiz info */}
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-white mb-2 pr-2 leading-snug">{quiz.title}</h3>
-                <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <h3 className="text-lg font-bold text-[#0136fe] mb-2 pr-2 leading-snug">{quiz.title}</h3>
+                <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>
                   {quiz.questions != null && (
                     <div className="flex items-center gap-1">
                       <BarChart3 className="w-4 h-4" />
@@ -126,7 +126,7 @@ export function QuizListPage() {
                   onClick={() => hostMutation.mutate(quiz.id)}
                   disabled={hostMutation.isPending}
                   className="flex-1 py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg, #f5c842 0%, #ffd700 100%)", color: "#1a0a2e" }}
+                  style={{ background: "linear-gradient(135deg, #0136fe 0%, #ffd700 100%)", color: "#b7f700" }}
                   whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Play className="w-4 h-4" />
                   Host

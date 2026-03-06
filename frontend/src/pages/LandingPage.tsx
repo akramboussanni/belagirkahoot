@@ -12,32 +12,9 @@ const STARS = Array.from({ length: 120 }, (_, i) => ({
   duration: 2.5 + (i % 5) * 0.7,
 }));
 
-/* ─── Crescent Moon SVG ──────────────────────────────────────────────────── */
-function CrescentMoon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 120 120" className={className} aria-hidden="true">
-      <defs>
-        <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#f5c842" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#f5c842" stopOpacity="0" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-      {/* Halo */}
-      <circle cx="60" cy="60" r="58" fill="url(#moonGlow)" />
-      {/* Moon body */}
-      <circle cx="60" cy="60" r="38" fill="#f5c842" filter="url(#glow)" opacity="0.95" />
-      {/* Mask circle for crescent */}
-      <circle cx="80" cy="50" r="34" fill="#06091a" />
-    </svg>
-  );
-}
 
 /* ─── Lantern SVG ────────────────────────────────────────────────────────── */
-function Lantern({ className, glowColor = "#f5c842" }: { className?: string; glowColor?: string }) {
+function Lantern({ className, glowColor = "#0136fe" }: { className?: string; glowColor?: string }) {
   return (
     <svg viewBox="0 0 40 72" className={className} aria-hidden="true">
       <defs>
@@ -71,7 +48,7 @@ function Lantern({ className, glowColor = "#f5c842" }: { className?: string; glo
 }
 
 /* ─── Geometric ornament ─────────────────────────────────────────────────── */
-function StarOrnament({ size = 32, color = "#f5c842", opacity = 0.3 }: { size?: number; color?: string; opacity?: number }) {
+function StarOrnament({ size = 32, color = "#0136fe", opacity = 0.3 }: { size?: number; color?: string; opacity?: number }) {
   const arms = 8;
   const outer = size / 2;
   const inner = outer * 0.4;
@@ -93,11 +70,11 @@ function StarOrnament({ size = 32, color = "#f5c842", opacity = 0.3 }: { size?: 
 function GeoDivider() {
   return (
     <div className="flex items-center gap-4 justify-center py-2">
-      <div style={{ height: 1, flex: 1, background: "linear-gradient(to right, transparent, rgba(245,200,66,0.3))" }} />
+      <div style={{ height: 1, flex: 1, background: "linear-gradient(to right, transparent, rgba(1,54,254,0.3))" }} />
       <StarOrnament size={20} opacity={0.6} />
       <StarOrnament size={12} opacity={0.4} />
       <StarOrnament size={20} opacity={0.6} />
-      <div style={{ height: 1, flex: 1, background: "linear-gradient(to left, transparent, rgba(245,200,66,0.3))" }} />
+      <div style={{ height: 1, flex: 1, background: "linear-gradient(to left, transparent, rgba(1,54,254,0.3))" }} />
     </div>
   );
 }
@@ -130,7 +107,7 @@ export function LandingPage() {
   }, []);
 
   return (
-    <div style={{ background: "#06091a", color: "#faf3e0", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ background: "#a5de00", color: "#0136fe", minHeight: "100vh", overflowX: "hidden" }}>
       {/* Grain overlay */}
       <canvas
         ref={canvasRef}
@@ -155,15 +132,15 @@ export function LandingPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <CrescentMoon className="w-8 h-8" />
+          <img src="/favicon.png" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" />
           <span style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontWeight: 800,
             fontSize: 20,
             letterSpacing: "0.08em",
-            color: "#f5c842",
+            color: "#0136fe",
           }}>
-            HILAL
+            {import.meta.env.VITE_APP_NAME?.toUpperCase() || 'KAHOOT'}
           </span>
         </div>
         <div style={{ display: "flex", gap: 12 }}>
@@ -171,15 +148,15 @@ export function LandingPage() {
             onClick={() => navigate("/join")}
             style={{
               padding: "8px 20px", borderRadius: 8,
-              border: "1px solid rgba(245,200,66,0.4)",
-              background: "rgba(245,200,66,0.08)",
-              color: "#f5c842", fontWeight: 600, fontSize: 13,
+              border: "1px solid rgba(1,54,254,0.4)",
+              background: "rgba(1,54,254,0.08)",
+              color: "#0136fe", fontWeight: 600, fontSize: 13,
               letterSpacing: "0.05em", cursor: "pointer",
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               transition: "all 0.2s",
             }}
-            onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = "rgba(245,200,66,0.18)"; }}
-            onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "rgba(245,200,66,0.08)"; }}
+            onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = "rgba(1,54,254,0.18)"; }}
+            onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "rgba(1,54,254,0.08)"; }}
           >
             Join Game
           </button>
@@ -187,14 +164,14 @@ export function LandingPage() {
             onClick={() => navigate("/login")}
             style={{
               padding: "8px 20px", borderRadius: 8,
-              background: "#f5c842",
-              color: "#06091a", fontWeight: 700, fontSize: 13,
+              background: "#0136fe",
+              color: "#a5de00", fontWeight: 700, fontSize: 13,
               letterSpacing: "0.05em", cursor: "pointer",
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               border: "none", transition: "all 0.2s",
             }}
             onMouseEnter={e => { (e.target as HTMLButtonElement).style.background = "#ffd700"; }}
-            onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "#f5c842"; }}
+            onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "#0136fe"; }}
           >
             Host a Quiz
           </button>
@@ -228,7 +205,7 @@ export function LandingPage() {
               width: s.size,
               height: s.size,
               borderRadius: "50%",
-              background: s.id % 11 === 0 ? "#f5c842" : "white",
+              background: s.id % 11 === 0 ? "#0136fe" : "white",
               pointerEvents: "none",
             }}
             animate={{ opacity: [0.2, 1, 0.2] }}
@@ -245,7 +222,7 @@ export function LandingPage() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
           >
-            <CrescentMoon className="w-36 h-36 sm:w-48 sm:h-48" />
+            <img src="/favicon.png" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" />
           </motion.div>
         </motion.div>
 
@@ -278,10 +255,10 @@ export function LandingPage() {
           <StarOrnament size={16} opacity={0.7} />
           <span style={{
             fontSize: 11, letterSpacing: "0.3em", fontWeight: 600,
-            color: "#f5c842", textTransform: "uppercase",
-            fontFamily: "'Poppins', sans-serif",
+            color: "#0136fe", textTransform: "uppercase",
+            fontFamily: "'Montserrat', sans-serif",
           }}>
-            Ramadan 2026
+            Ready to Play
           </span>
           <StarOrnament size={16} opacity={0.7} />
         </motion.div>
@@ -293,23 +270,23 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 900,
               fontSize: "clamp(3rem, 9vw, 7rem)",
               lineHeight: 0.95,
               letterSpacing: "-0.02em",
-              color: "#faf3e0",
+              color: "#0136fe",
               marginBottom: 0,
             }}
           >
             CELEBRATE
             <br />
             <span style={{
-              WebkitTextStroke: "2px #f5c842",
+              WebkitTextStroke: "2px #0136fe",
               color: "transparent",
               display: "block",
             }}>
-              RAMADAN.
+              {import.meta.env.VITE_APP_NAME || 'Kahoot'}.
             </span>
           </motion.h1>
 
@@ -318,12 +295,12 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 900,
               fontSize: "clamp(3rem, 9vw, 7rem)",
               lineHeight: 0.95,
               letterSpacing: "-0.02em",
-              color: "#f5c842",
+              color: "#0136fe",
               marginTop: 8,
             }}
           >
@@ -338,15 +315,15 @@ export function LandingPage() {
             style={{
               marginTop: 28,
               fontSize: "clamp(1rem, 2.5vw, 1.2rem)",
-              color: "rgba(250,243,224,0.65)",
-              fontFamily: "'Poppins', sans-serif",
+              color: "rgba(1,54,254,0.8)",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 400,
               lineHeight: 1.7,
               maxWidth: 520,
               margin: "28px auto 0",
             }}
           >
-            A live multiplayer quiz game built for Ramadan nights.
+            A live multiplayer quiz game built for {import.meta.env.VITE_APP_NAME || 'Kahoot'} nights.
             Challenge friends, test your knowledge, and compete in real time.
           </motion.p>
 
@@ -361,23 +338,23 @@ export function LandingPage() {
               onClick={() => navigate("/join")}
               style={{
                 padding: "16px 36px", borderRadius: 12,
-                background: "#f5c842",
-                color: "#06091a", fontWeight: 800, fontSize: 15,
+                background: "#0136fe",
+                color: "#a5de00", fontWeight: 800, fontSize: 15,
                 letterSpacing: "0.06em", cursor: "pointer",
-                fontFamily: "'Poppins', sans-serif", border: "none",
-                boxShadow: "0 0 40px rgba(245,200,66,0.35), 0 8px 24px rgba(0,0,0,0.4)",
+                fontFamily: "'Montserrat', sans-serif", border: "none",
+                boxShadow: "0 0 40px rgba(1,54,254,0.35), 0 8px 24px rgba(0,0,0,0.4)",
                 transition: "all 0.2s",
                 textTransform: "uppercase",
               }}
               onMouseEnter={e => {
                 const b = e.currentTarget;
                 b.style.transform = "translateY(-2px)";
-                b.style.boxShadow = "0 0 60px rgba(245,200,66,0.5), 0 12px 32px rgba(0,0,0,0.5)";
+                b.style.boxShadow = "0 0 60px rgba(1,54,254,0.5), 0 12px 32px rgba(0,0,0,0.5)";
               }}
               onMouseLeave={e => {
                 const b = e.currentTarget;
                 b.style.transform = "translateY(0)";
-                b.style.boxShadow = "0 0 40px rgba(245,200,66,0.35), 0 8px 24px rgba(0,0,0,0.4)";
+                b.style.boxShadow = "0 0 40px rgba(1,54,254,0.35), 0 8px 24px rgba(0,0,0,0.4)";
               }}
             >
               Join a Game
@@ -387,17 +364,17 @@ export function LandingPage() {
               style={{
                 padding: "16px 36px", borderRadius: 12,
                 background: "transparent",
-                color: "#faf3e0", fontWeight: 700, fontSize: 15,
+                color: "#0136fe", fontWeight: 700, fontSize: 15,
                 letterSpacing: "0.06em", cursor: "pointer",
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 border: "1.5px solid rgba(250,243,224,0.25)",
                 transition: "all 0.2s",
                 textTransform: "uppercase",
               }}
               onMouseEnter={e => {
                 const b = e.currentTarget;
-                b.style.borderColor = "rgba(245,200,66,0.5)";
-                b.style.color = "#f5c842";
+                b.style.borderColor = "rgba(1,54,254,0.5)";
+                b.style.color = "#0136fe";
               }}
               onMouseLeave={e => {
                 const b = e.currentTarget;
@@ -422,8 +399,8 @@ export function LandingPage() {
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
           >
-            <span style={{ fontSize: 10, letterSpacing: "0.25em", color: "rgba(250,243,224,0.3)", fontFamily: "'Poppins', sans-serif" }}>SCROLL</span>
-            <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, rgba(245,200,66,0.5), transparent)" }} />
+            <span style={{ fontSize: 10, letterSpacing: "0.25em", color: "rgba(250,243,224,0.3)", fontFamily: "'Montserrat', sans-serif" }}>SCROLL</span>
+            <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, rgba(1,54,254,0.5), transparent)" }} />
           </motion.div>
         </motion.div>
       </section>
@@ -441,18 +418,18 @@ export function LandingPage() {
         >
           <p style={{
             fontSize: 11, letterSpacing: "0.3em", fontWeight: 600,
-            color: "#f5c842", textTransform: "uppercase",
-            fontFamily: "'Poppins', sans-serif", marginBottom: 16,
+            color: "#0136fe", textTransform: "uppercase",
+            fontFamily: "'Montserrat', sans-serif", marginBottom: 16,
           }}>
-            Why Hilal
+            Why {import.meta.env.VITE_APP_NAME || 'Kahoot'}
           </p>
           <h2 style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            color: "#faf3e0", letterSpacing: "-0.02em", lineHeight: 1.1,
+            color: "#0136fe", letterSpacing: "-0.02em", lineHeight: 1.1,
           }}>
             Everything Kahoot charges for.<br />
-            <span style={{ color: "#f5c842" }}>Free. Forever.</span>
+            <span style={{ color: "#0136fe" }}>Free. Forever.</span>
           </h2>
         </motion.div>
 
@@ -466,7 +443,7 @@ export function LandingPage() {
             marginBottom: 32,
             borderRadius: 20,
             overflow: "hidden",
-            border: "1px solid rgba(245,200,66,0.15)",
+            border: "1px solid rgba(1,54,254,0.15)",
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
           }}
@@ -478,7 +455,7 @@ export function LandingPage() {
             borderRight: "1px solid rgba(255,255,255,0.06)",
           }}>
             <p style={{
-              fontFamily: "'Poppins', sans-serif", fontSize: 11,
+              fontFamily: "'Montserrat', sans-serif", fontSize: 11,
               letterSpacing: "0.25em", fontWeight: 700, color: "rgba(250,243,224,0.3)",
               textTransform: "uppercase", marginBottom: 20,
             }}>
@@ -487,7 +464,7 @@ export function LandingPage() {
             {[
               "Up to 10 players free",
               "Paid plan for more players",
-              "No Ramadan theme",
+              "No {import.meta.env.VITE_APP_NAME || 'Kahoot'} theme",
               "Generic quiz experience",
               "AI quiz generation — paid only",
             ].map((item) => (
@@ -497,7 +474,7 @@ export function LandingPage() {
                   <path d="M5 5l6 6M11 5l-6 6" stroke="#f44336" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 <span style={{
-                  fontFamily: "'Poppins', sans-serif", fontSize: 14,
+                  fontFamily: "'Montserrat', sans-serif", fontSize: 14,
                   color: "rgba(250,243,224,0.4)", fontWeight: 400,
                 }}>
                   {item}
@@ -506,28 +483,28 @@ export function LandingPage() {
             ))}
           </div>
 
-          {/* Hilal column */}
+          {/* {import.meta.env.VITE_APP_NAME || 'Kahoot'} column */}
           <div style={{
             padding: "40px 44px",
-            background: "rgba(245,200,66,0.04)",
+            background: "rgba(1,54,254,0.04)",
             position: "relative",
             overflow: "hidden",
           }}>
             <div style={{
               position: "absolute", top: 0, left: 0, right: 0, height: 2,
-              background: "linear-gradient(to right, #f5c842, #ff6b35)",
+              background: "linear-gradient(to right, #0136fe, #ff6b35)",
             }} />
             <p style={{
-              fontFamily: "'Poppins', sans-serif", fontSize: 11,
-              letterSpacing: "0.25em", fontWeight: 700, color: "#f5c842",
+              fontFamily: "'Montserrat', sans-serif", fontSize: 11,
+              letterSpacing: "0.25em", fontWeight: 700, color: "#0136fe",
               textTransform: "uppercase", marginBottom: 20,
             }}>
-              Hilal
+              {import.meta.env.VITE_APP_NAME || 'Kahoot'}
             </p>
             {[
               "Unlimited players, always free",
               "No account needed to play",
-              "Built for Ramadan",
+              "Built for {import.meta.env.VITE_APP_NAME || 'Kahoot'}",
               "Real-time, speed-scored competition",
               "AI-powered quiz generation — free",
             ].map((item) => (
@@ -537,8 +514,8 @@ export function LandingPage() {
                   <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#4caf50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span style={{
-                  fontFamily: "'Poppins', sans-serif", fontSize: 14,
-                  color: "rgba(250,243,224,0.85)", fontWeight: 500,
+                  fontFamily: "'Montserrat', sans-serif", fontSize: 14,
+                  color: "rgba(1,54,254,0.9)", fontWeight: 500,
                 }}>
                   {item}
                 </span>
@@ -556,9 +533,9 @@ export function LandingPage() {
               body: "WebSocket-powered. Every answer, score update, and reveal happens instantly across all connected players.",
             },
             {
-              label: "Ramadan-Themed",
+              label: "{import.meta.env.VITE_APP_NAME || 'Kahoot'}-Themed",
               title: "Designed for the occasion",
-              body: "Prayer arc transitions, crescent moon motifs, and golden design tokens — built with intention, not as an afterthought.",
+              body: "Prayer arc transitions, Kahoot moon motifs, and golden design tokens — built with intention, not as an afterthought.",
             },
             {
               label: "Speed Scoring",
@@ -584,25 +561,25 @@ export function LandingPage() {
             >
               <span style={{
                 display: "inline-block",
-                fontFamily: "'Poppins', sans-serif", fontSize: 10,
+                fontFamily: "'Montserrat', sans-serif", fontSize: 10,
                 letterSpacing: "0.25em", fontWeight: 700,
-                color: "#f5c842", textTransform: "uppercase",
+                color: "#0136fe", textTransform: "uppercase",
                 marginBottom: 12,
                 padding: "3px 10px",
-                border: "1px solid rgba(245,200,66,0.25)",
+                border: "1px solid rgba(1,54,254,0.25)",
                 borderRadius: 4,
               }}>
                 {f.label}
               </span>
               <h3 style={{
-                fontFamily: "'Poppins', sans-serif", fontWeight: 700,
-                fontSize: 16, color: "#faf3e0", marginBottom: 10,
+                fontFamily: "'Montserrat', sans-serif", fontWeight: 700,
+                fontSize: 16, color: "#0136fe", marginBottom: 10,
                 letterSpacing: "-0.01em", lineHeight: 1.3,
               }}>
                 {f.title}
               </h3>
               <p style={{
-                fontFamily: "'Poppins', sans-serif", fontSize: 13,
+                fontFamily: "'Montserrat', sans-serif", fontSize: 13,
                 color: "rgba(250,243,224,0.45)", lineHeight: 1.7,
               }}>
                 {f.body}
@@ -630,15 +607,15 @@ export function LandingPage() {
           >
             <p style={{
               fontSize: 11, letterSpacing: "0.3em", fontWeight: 600,
-              color: "#f5c842", textTransform: "uppercase",
-              fontFamily: "'Poppins', sans-serif", marginBottom: 16,
+              color: "#0136fe", textTransform: "uppercase",
+              fontFamily: "'Montserrat', sans-serif", marginBottom: 16,
             }}>
               How it works
             </p>
             <h2 style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              color: "#faf3e0", letterSpacing: "-0.02em", lineHeight: 1.1,
+              color: "#0136fe", letterSpacing: "-0.02em", lineHeight: 1.1,
             }}>
               Three steps to quiz night.
             </h2>
@@ -661,7 +638,7 @@ export function LandingPage() {
               {
                 n: "03",
                 title: "Play, compete, celebrate",
-                body: "Questions appear in real time. The prayer arc counts you in. Scores update live. Crown your Ramadan champion.",
+                body: "Questions appear in real time. The prayer arc counts you in. Scores update live. Crown your {import.meta.env.VITE_APP_NAME || 'Kahoot'} champion.",
                 side: "left",
               },
             ].map((step, i) => (
@@ -677,17 +654,17 @@ export function LandingPage() {
                   alignItems: "flex-start",
                   justifyContent: step.side === "right" ? "flex-end" : "flex-start",
                   padding: "40px 0",
-                  borderBottom: i < 2 ? "1px solid rgba(245,200,66,0.08)" : "none",
+                  borderBottom: i < 2 ? "1px solid rgba(1,54,254,0.08)" : "none",
                   flexDirection: step.side === "right" ? "row-reverse" : "row",
                 }}
               >
                 <div style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Montserrat', sans-serif",
                   fontWeight: 900,
                   fontSize: "clamp(4rem, 10vw, 8rem)",
                   lineHeight: 1,
                   letterSpacing: "-0.04em",
-                  WebkitTextStroke: "1px rgba(245,200,66,0.25)",
+                  WebkitTextStroke: "1px rgba(1,54,254,0.25)",
                   color: "transparent",
                   flexShrink: 0,
                   userSelect: "none",
@@ -696,15 +673,15 @@ export function LandingPage() {
                 </div>
                 <div style={{ maxWidth: 480, paddingTop: 16 }}>
                   <h3 style={{
-                    fontFamily: "'Poppins', sans-serif", fontWeight: 800,
-                    fontSize: "clamp(1.3rem, 3vw, 1.9rem)", color: "#faf3e0",
+                    fontFamily: "'Montserrat', sans-serif", fontWeight: 800,
+                    fontSize: "clamp(1.3rem, 3vw, 1.9rem)", color: "#0136fe",
                     letterSpacing: "-0.02em", marginBottom: 14,
                   }}>
                     {step.title}
                   </h3>
                   <p style={{
-                    fontFamily: "'Poppins', sans-serif", fontSize: 15,
-                    color: "rgba(250,243,224,0.55)", lineHeight: 1.8,
+                    fontFamily: "'Montserrat', sans-serif", fontSize: 15,
+                    color: "rgba(1,54,254,0.7)", lineHeight: 1.8,
                   }}>
                     {step.body}
                   </p>
@@ -722,7 +699,7 @@ export function LandingPage() {
           position: "absolute", top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
           width: 600, height: 600,
-          background: "radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(1,54,254,0.08) 0%, transparent 70%)",
           pointerEvents: "none",
         }} />
 
@@ -733,14 +710,14 @@ export function LandingPage() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-            <CrescentMoon className="w-20 h-20" />
+            <img src="/favicon.png" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" />
           </div>
 
           <h2 style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontWeight: 900,
             fontSize: "clamp(2.5rem, 7vw, 5.5rem)",
-            color: "#faf3e0",
+            color: "#0136fe",
             letterSpacing: "-0.03em",
             lineHeight: 1.05,
             marginBottom: 20,
@@ -749,34 +726,34 @@ export function LandingPage() {
           </h2>
 
           <p style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: 16, color: "rgba(250,243,224,0.5)",
             lineHeight: 1.7, maxWidth: 440, margin: "0 auto 44px",
           }}>
-            Ramadan Mubarak. Enter a game code to join your host's session.
+            {import.meta.env.VITE_APP_NAME || 'Kahoot'} Mubarak. Enter a game code to join your host's session.
           </p>
 
           <button
             onClick={() => navigate("/join")}
             style={{
               padding: "18px 52px", borderRadius: 14,
-              background: "#f5c842",
-              color: "#06091a", fontWeight: 800, fontSize: 16,
+              background: "#0136fe",
+              color: "#a5de00", fontWeight: 800, fontSize: 16,
               letterSpacing: "0.08em", cursor: "pointer",
-              fontFamily: "'Poppins', sans-serif", border: "none",
-              boxShadow: "0 0 60px rgba(245,200,66,0.4), 0 12px 40px rgba(0,0,0,0.5)",
+              fontFamily: "'Montserrat', sans-serif", border: "none",
+              boxShadow: "0 0 60px rgba(1,54,254,0.4), 0 12px 40px rgba(0,0,0,0.5)",
               textTransform: "uppercase",
               transition: "all 0.2s",
             }}
             onMouseEnter={e => {
               const b = e.currentTarget;
               b.style.transform = "translateY(-3px) scale(1.02)";
-              b.style.boxShadow = "0 0 80px rgba(245,200,66,0.6), 0 16px 48px rgba(0,0,0,0.6)";
+              b.style.boxShadow = "0 0 80px rgba(1,54,254,0.6), 0 16px 48px rgba(0,0,0,0.6)";
             }}
             onMouseLeave={e => {
               const b = e.currentTarget;
               b.style.transform = "translateY(0) scale(1)";
-              b.style.boxShadow = "0 0 60px rgba(245,200,66,0.4), 0 12px 40px rgba(0,0,0,0.5)";
+              b.style.boxShadow = "0 0 60px rgba(1,54,254,0.4), 0 12px 40px rgba(0,0,0,0.5)";
             }}
           >
             Join a Game
@@ -788,7 +765,7 @@ export function LandingPage() {
           <GeoDivider />
           <div style={{ marginTop: 28, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
             <p style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: 12, color: "rgba(250,243,224,0.2)",
               letterSpacing: "0.1em",
             }}>
@@ -797,19 +774,19 @@ export function LandingPage() {
                 href="https://github.com/HassanA01"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "rgba(245,200,66,0.5)", textDecoration: "none", fontWeight: 600 }}
-                onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = "#f5c842"; }}
-                onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = "rgba(245,200,66,0.5)"; }}
+                style={{ color: "rgba(1,54,254,0.5)", textDecoration: "none", fontWeight: 600 }}
+                onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = "#0136fe"; }}
+                onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = "rgba(1,54,254,0.5)"; }}
               >
                 HassanA01
               </a>
             </p>
             <p style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: 11, color: "rgba(250,243,224,0.15)",
               letterSpacing: "0.08em",
             }}>
-              © {new Date().getFullYear()} Hilal. All rights reserved.
+              © {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME || 'Kahoot'}. All rights reserved.
             </p>
           </div>
         </div>

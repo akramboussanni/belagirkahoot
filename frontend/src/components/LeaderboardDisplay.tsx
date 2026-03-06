@@ -14,13 +14,13 @@ function RankBadge({ rank }: { rank: number }) {
   if (rank <= 3)
     return (
       <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
-        style={{ background: rank === 1 ? "rgba(245,200,66,0.2)" : rank === 2 ? "rgba(192,192,192,0.2)" : "rgba(205,127,50,0.2)" }}>
+        style={{ background: rank === 1 ? "rgba(1,54,254,0.2)" : rank === 2 ? "rgba(192,192,192,0.2)" : "rgba(205,127,50,0.2)" }}>
         {MEDALS[rank]}
       </div>
     );
   return (
     <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-      style={{ background: "rgba(245,200,66,0.15)", color: "#f5c842" }}>
+      style={{ background: "rgba(1,54,254,0.15)", color: "#0136fe" }}>
       #{rank}
     </div>
   );
@@ -93,7 +93,7 @@ export function LeaderboardDisplay({
             ref={setRef(entry.player_id)}
             style={{
               ...(isHighlighted
-                ? { background: "rgba(245, 200, 66, 0.2)", border: "2px solid rgba(245, 200, 66, 0.5)" }
+                ? { background: "rgba(1,54,254, 0.2)", border: "2px solid rgba(1,54,254, 0.5)" }
                 : { background: "rgba(255, 255, 255, 0.08)", border: "2px solid transparent" }),
               ...(!hasPrev
                 ? { transitionDelay: `${i * 80}ms`, transition: "opacity 0.4s ease, transform 0.4s ease" }
@@ -107,13 +107,13 @@ export function LeaderboardDisplay({
             <RankBadge rank={entry.rank} />
 
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-white truncate">{entry.name}</p>
+              <p className="font-bold text-[#0136fe] truncate">{entry.name}</p>
               {isHighlighted && (
-                <p className="text-xs font-semibold" style={{ color: "#f5c842" }}>(you)</p>
+                <p className="text-xs font-semibold" style={{ color: "#0136fe" }}>(you)</p>
               )}
             </div>
 
-            <span className="font-bold tabular-nums shrink-0" style={{ color: "#f5c842" }}>
+            <span className="font-bold tabular-nums shrink-0" style={{ color: "#0136fe" }}>
               {entry.score}
             </span>
           </div>

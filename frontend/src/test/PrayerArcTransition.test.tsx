@@ -43,7 +43,7 @@ describe("PrayerArcTransition", () => {
     const { container } = render(<PrayerArcTransition onComplete={vi.fn()} />);
     act(() => { vi.advanceTimersByTime(1500); });
     const circles = container.querySelectorAll("circle");
-    circles.forEach((c) => expect(c.getAttribute("fill")).toBe("#f5c842"));
+    circles.forEach((c) => expect(c.getAttribute("fill")).toBe("#0136fe"));
   });
 
   it("does not call onComplete after unmount", () => {

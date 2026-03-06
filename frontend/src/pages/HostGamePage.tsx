@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ChevronRight, Users, LogOut } from "lucide-react";
-import { CrescentIcon } from "../components/icons";
+
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
 import { endSession } from "../api/sessions";
@@ -137,16 +137,16 @@ export function HostGamePage() {
 
   if (phase === "waiting") {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 text-center space-y-4">
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
-            <CrescentIcon className="w-12 h-12 mx-auto" style={{ color: "#f5c842" }} />
+            <img src="/favicon.png" alt="Logo" className="w-12 h-12 mx-auto object-contain drop-shadow-md" />
           </motion.div>
-          <p className="text-lg font-semibold text-white">Starting game…</p>
+          <p className="text-lg font-semibold text-[#0136fe]">Starting game…</p>
           <div className="flex items-center justify-center gap-2">
             <span className={`w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
-            <p className="text-sm" style={{ color: wsReady ? "#4caf50" : "#f5c842" }}>
+            <p className="text-sm" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
               {wsReady ? "Connected" : "Connecting…"}
             </p>
           </div>
@@ -170,18 +170,18 @@ export function HostGamePage() {
   if (phase === "leaderboard") {
     const isLastQuestion = !currentQuestion || currentQuestion.question_index + 1 >= currentQuestion.total_questions;
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
           <div className="w-full max-w-lg space-y-6">
-            <motion.h2 className="text-2xl font-black text-center" style={{ color: "#f5c842" }}
+            <motion.h2 className="text-2xl font-black text-center" style={{ color: "#0136fe" }}
               initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
               Leaderboard
             </motion.h2>
             <LeaderboardDisplay entries={leaderboard} prevEntries={prevLeaderboard} />
             <motion.button
               onClick={handleNextQuestion}
-              className="w-full py-4 rounded-xl font-bold text-lg text-white flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-xl font-bold text-lg text-[#0136fe] flex items-center justify-center gap-2"
               style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", boxShadow: "0 8px 30px rgba(255,107,53,0.4)" }}
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -199,8 +199,8 @@ export function HostGamePage() {
   const dashOffset = circumference * (1 - timeLeft / Math.max(timeLimit, 1));
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex flex-col" style={{ background: "#1a0a2e" }}>
-      <div className="ramadan-pattern" />
+    <div className="min-h-screen w-full relative overflow-hidden flex flex-col" style={{ background: "#b7f700" }}>
+      <div className="fun-pattern" />
 
       {showEndConfirm && (
         <ConfirmModal
@@ -214,25 +214,25 @@ export function HostGamePage() {
 
       {/* Top bar */}
       <div className="relative z-20 px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between"
-        style={{ background: "linear-gradient(180deg, rgba(30,15,50,0.95) 0%, rgba(20,10,40,0.9) 100%)", borderBottom: "1px solid rgba(245,200,66,0.2)" }}>
+        style={{ background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(240,240,240,1) 100%)", borderBottom: "1px solid rgba(1,54,254,0.2)" }}>
         <div className="flex items-center gap-2 sm:gap-3">
-          <CrescentIcon className="w-6 h-6" style={{ color: "#f5c842" }} />
-          <span className="hidden sm:inline text-lg font-bold" style={{ color: "#f5c842" }}>Hilal Live</span>
-          <span className="font-mono text-sm px-2 py-0.5 rounded" style={{ background: "rgba(245,200,66,0.1)", color: "rgba(255,255,255,0.5)" }}>{code}</span>
+          <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
+          <span className="hidden sm:inline text-lg font-bold" style={{ color: "#0136fe" }}>{import.meta.env.VITE_APP_NAME || 'Kahoot'} Live</span>
+          <span className="font-mono text-sm px-2 py-0.5 rounded" style={{ background: "rgba(1,54,254,0.1)", color: "rgba(1,54,254,0.7)" }}>{code}</span>
         </div>
         {currentQuestion && (
-          <div className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
-            Question <span className="font-bold text-white">{currentQuestion.question_index + 1}</span> / {currentQuestion.total_questions}
+          <div className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>
+            Question <span className="font-bold text-[#0136fe]">{currentQuestion.question_index + 1}</span> / {currentQuestion.total_questions}
           </div>
         )}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5">
             <Users className="w-4 h-4" style={{ color: "#2196f3" }} />
-            <span className="font-bold text-white">{answeredCount}</span>
+            <span className="font-bold text-[#0136fe]">{answeredCount}</span>
             {totalPlayers > 0 && (
               <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>/ {totalPlayers}</span>
             )}
-            <span className="hidden sm:inline text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>answered</span>
+            <span className="hidden sm:inline text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>answered</span>
             <span className={`ml-1 w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
           </div>
           <motion.button onClick={() => setShowEndConfirm(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -249,14 +249,14 @@ export function HostGamePage() {
           {/* Progress bar */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Progress</p>
-              <p className="font-bold text-sm" style={{ color: "#f5c842" }}>
+              <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Progress</p>
+              <p className="font-bold text-sm" style={{ color: "#0136fe" }}>
                 Q{currentQuestion.question_index + 1} / {currentQuestion.total_questions}
               </p>
             </div>
             <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
               <motion.div className="h-full rounded-full"
-                style={{ background: "linear-gradient(90deg, #f5c842 0%, #ffd700 100%)" }}
+                style={{ background: "linear-gradient(90deg, #0136fe 0%, #ffd700 100%)" }}
                 initial={{ width: 0 }}
                 animate={{ width: `${((currentQuestion.question_index + 1) / currentQuestion.total_questions) * 100}%` }}
                 transition={{ duration: 0.5 }} />
@@ -265,34 +265,34 @@ export function HostGamePage() {
 
           {/* Question card */}
           <motion.div className="p-8 rounded-3xl flex flex-col"
-            style={{ background: "linear-gradient(135deg, rgba(42,20,66,0.9) 0%, rgba(30,15,50,0.95) 100%)", border: "2px solid rgba(245,200,66,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
+            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)", border: "2px solid rgba(1,54,254,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
             initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg"
-                style={{ background: "rgba(245,200,66,0.2)", color: "#f5c842", border: "2px solid rgba(245,200,66,0.5)" }}>
+                style={{ background: "rgba(1,54,254,0.2)", color: "#0136fe", border: "2px solid rgba(1,54,254,0.5)" }}>
                 Q{currentQuestion.question_index + 1}
               </div>
-              <CrescentIcon className="w-5 h-5" style={{ color: "#f5c842" }} />
+              <img src="/favicon.png" alt="Logo" className="w-5 h-5 object-contain drop-shadow-md" />
             </div>
-            <h2 className="text-3xl font-bold text-white leading-tight">{currentQuestion.question.text}</h2>
+            <h2 className="text-3xl font-bold text-[#0136fe] leading-tight">{currentQuestion.question.text}</h2>
 
             {/* Timer circle */}
             <div className="flex justify-center mt-8">
               <div className="relative w-28 h-28">
                 <svg className="w-28 h-28" style={{ transform: "rotate(-90deg)" }} viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="54" stroke="rgba(245,200,66,0.15)" strokeWidth="8" fill="none" />
+                  <circle cx="60" cy="60" r="54" stroke="rgba(1,54,254,0.15)" strokeWidth="8" fill="none" />
                   <circle cx="60" cy="60" r="54"
-                    stroke={timeLeft <= 5 ? "#f44336" : "#f5c842"}
+                    stroke={timeLeft <= 5 ? "#f44336" : "#0136fe"}
                     strokeWidth="8" fill="none" strokeLinecap="round"
                     style={{
                       strokeDasharray: circumference,
                       strokeDashoffset: dashOffset,
-                      filter: `drop-shadow(0 0 ${timeLeft <= 5 ? "20px rgba(244,67,54,0.8)" : "12px rgba(245,200,66,0.6)"})`,
+                      filter: `drop-shadow(0 0 ${timeLeft <= 5 ? "20px rgba(244,67,54,0.8)" : "12px rgba(1,54,254,0.6)"})`,
                       transition: "stroke-dashoffset 1s linear, stroke 0.3s ease",
                     }} />
                 </svg>
                 <motion.div className="absolute inset-0 flex items-center justify-center text-4xl font-black"
-                  style={{ color: timeLeft <= 5 ? "#f44336" : "#f5c842" }}
+                  style={{ color: timeLeft <= 5 ? "#f44336" : "#0136fe" }}
                   animate={timeLeft <= 5 && timeLeft > 0 ? { scale: [1, 1.15, 1] } : {}}
                   transition={{ duration: 0.5, repeat: Infinity }}>
                   {timeLeft}
@@ -309,25 +309,25 @@ export function HostGamePage() {
                 <span className="text-2xl font-black" style={{ color: "#4caf50" }}>
                   {Object.values(revealPayload.scores).filter((s) => s.is_correct).length}
                 </span>
-                <span className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
+                <span className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>
                   / {Object.keys(revealPayload.scores).length} answered correctly
                 </span>
               </div>
             ) : (
               <div className="p-4 rounded-xl flex items-center gap-3"
-                style={{ background: "rgba(245,200,66,0.08)", border: "1px solid rgba(245,200,66,0.2)" }}>
+                style={{ background: "rgba(1,54,254,0.08)", border: "1px solid rgba(1,54,254,0.2)" }}>
                 <motion.div className="w-2 h-2 rounded-full bg-green-400" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-[#0136fe]">
                   {answeredCount}{totalPlayers > 0 ? ` / ${totalPlayers}` : ""}
                 </span>
-                <span className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>players have answered</span>
+                <span className="text-sm" style={{ color: "rgba(1,54,254,0.8)" }}>players have answered</span>
               </div>
             )}
           </motion.div>
 
           {/* Options */}
           <motion.div className="p-6 rounded-3xl space-y-3"
-            style={{ background: "linear-gradient(135deg, rgba(42,20,66,0.9) 0%, rgba(30,15,50,0.95) 100%)", border: "2px solid rgba(245,200,66,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
+            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)", border: "2px solid rgba(1,54,254,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>Answer Options</h3>
@@ -349,11 +349,11 @@ export function HostGamePage() {
                     opacity: dimmed ? 0.4 : 1,
                   }}
                   initial={{ opacity: 0, x: 20 }} animate={{ opacity: dimmed ? 0.4 : 1, x: 0 }} transition={{ delay: i * 0.08 }}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-white shrink-0 text-sm"
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-[#0136fe] shrink-0 text-sm"
                     style={{ background: color }}>
                     {OPTION_LETTERS[i]}
                   </div>
-                  <span className="font-medium text-white flex-1 text-sm leading-snug">{opt.text}</span>
+                  <span className="font-medium text-[#0136fe] flex-1 text-sm leading-snug">{opt.text}</span>
                   {revealed && isCorrect && (
                     <motion.span className="text-xl font-black shrink-0" style={{ color }}
                       initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>

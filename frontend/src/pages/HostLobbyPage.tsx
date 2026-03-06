@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { Users, Copy, Check } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { LanternIcon, CrescentIcon } from "../components/icons";
+
 import { getSessionByCode, listSessionPlayers, startSession } from "../api/sessions";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
@@ -19,7 +19,7 @@ interface WsPlayerEvent {
 }
 
 const PLAYER_COLORS = [
-  "#f5c842", "#ff6b35", "#4caf50", "#2196f3", "#f44336",
+  "#0136fe", "#ff6b35", "#4caf50", "#2196f3", "#f44336",
   "#9c27b0", "#00bcd4", "#ff9800",
 ];
 
@@ -97,8 +97,8 @@ export function HostLobbyPage() {
 
   if (isError) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 min-h-screen flex items-center justify-center">
           <p style={{ color: "#f44336" }}>Session not found.</p>
         </div>
@@ -107,8 +107,8 @@ export function HostLobbyPage() {
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-      <div className="ramadan-pattern" />
+    <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+      <div className="fun-pattern" />
 
       <div className="relative z-10 min-h-screen flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 max-w-2xl mx-auto">
         {/* Animated lanterns */}
@@ -116,7 +116,7 @@ export function HostLobbyPage() {
           {[{ delay: 0 }, { delay: 0.5 }].map((l, i) => (
             <motion.div key={i} animate={{ y: [0, -10, 0], rotate: [i === 0 ? -5 : 5, i === 0 ? 5 : -5, i === 0 ? -5 : 5] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: l.delay }}>
-              <LanternIcon className="w-10 h-10 drop-shadow-[0_0_15px_rgba(245,200,66,0.6)]" style={{ color: "#f5c842" }} />
+              
             </motion.div>
           ))}
         </div>
@@ -125,18 +125,18 @@ export function HostLobbyPage() {
           {/* Room code */}
           <motion.div className="text-center" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center justify-center gap-2 mb-3">
-              <CrescentIcon className="w-6 h-6" style={{ color: "#f5c842" }} />
-              <p className="text-sm font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.6)" }}>Room Code</p>
+              <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
+              <p className="text-sm font-medium uppercase tracking-widest" style={{ color: "rgba(1,54,254,0.8)" }}>Room Code</p>
             </div>
             <h1 className="text-5xl sm:text-8xl font-black tracking-widest" style={{
-              color: "#f5c842",
-              textShadow: "0 0 30px rgba(245,200,66,0.6), 0 4px 20px rgba(0,0,0,0.5)",
+              color: "#0136fe",
+              textShadow: "0 0 30px rgba(1,54,254,0.6), 0 4px 20px rgba(0,0,0,0.5)",
             }}>
               {code}
             </h1>
             <div className="flex items-center justify-center gap-2 mt-3">
               <span className={`w-2 h-2 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} animate-pulse`} />
-              <p className="text-sm" style={{ color: wsReady ? "#4caf50" : "#f5c842" }}>
+              <p className="text-sm" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
                 {wsReady ? "Connected" : "Connecting…"}
               </p>
             </div>
@@ -145,12 +145,12 @@ export function HostLobbyPage() {
           {/* Join URL */}
           <motion.div
             className="p-4 rounded-2xl flex items-center gap-3"
-            style={{ background: "rgba(245,200,66,0.08)", border: "1px solid rgba(245,200,66,0.2)" }}
+            style={{ background: "rgba(1,54,254,0.08)", border: "1px solid rgba(1,54,254,0.2)" }}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            <p className="font-mono text-sm flex-1 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{joinUrl}</p>
+            <p className="font-mono text-sm flex-1 truncate" style={{ color: "rgba(1,54,254,0.8)" }}>{joinUrl}</p>
             <motion.button onClick={handleCopyUrl} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               className="p-2 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: copied ? "rgba(76,175,80,0.2)" : "rgba(245,200,66,0.2)", color: copied ? "#4caf50" : "#f5c842" }}>
+              style={{ background: copied ? "rgba(76,175,80,0.2)" : "rgba(1,54,254,0.2)", color: copied ? "#4caf50" : "#0136fe" }}>
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </motion.button>
           </motion.div>
@@ -177,31 +177,31 @@ export function HostLobbyPage() {
 
           {/* Player count */}
           <motion.div className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <Users className="w-5 h-5" style={{ color: "#f5c842" }} />
-            <h2 className="text-lg font-bold text-white">
-              Players <span style={{ color: "#f5c842" }}>({players.length})</span>
+            <Users className="w-5 h-5" style={{ color: "#0136fe" }} />
+            <h2 className="text-lg font-bold text-[#0136fe]">
+              Players <span style={{ color: "#0136fe" }}>({players.length})</span>
             </h2>
           </motion.div>
 
           {/* Player list */}
           {players.length === 0 ? (
             <motion.div className="rounded-2xl p-10 text-center"
-              style={{ background: "rgba(245,200,66,0.05)", border: "2px dashed rgba(245,200,66,0.2)" }}
+              style={{ background: "rgba(1,54,254,0.05)", border: "2px dashed rgba(1,54,254,0.2)" }}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <p style={{ color: "rgba(255,255,255,0.5)" }}>Waiting for players to join…</p>
+              <p style={{ color: "rgba(1,54,254,0.7)" }}>Waiting for players to join…</p>
             </motion.div>
           ) : (
             <motion.div className="space-y-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               {players.map((player, i) => (
                 <motion.div key={player.id}
                   className="px-4 py-3 rounded-xl flex items-center gap-3"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(245,200,66,0.15)" }}
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(1,54,254,0.15)" }}
                   initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0"
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[#0136fe] flex-shrink-0"
                     style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}>
                     {player.name[0]?.toUpperCase()}
                   </div>
-                  <span className="font-medium text-white">{player.name}</span>
+                  <span className="font-medium text-[#0136fe]">{player.name}</span>
                 </motion.div>
               ))}
             </motion.div>
@@ -216,7 +216,7 @@ export function HostLobbyPage() {
               background: players.length > 0 && !startMutation.isPending
                 ? "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)"
                 : "rgba(255,107,53,0.3)",
-              color: "white",
+              color: "#0136fe",
               boxShadow: players.length > 0 ? "0 8px 30px rgba(255,107,53,0.4)" : "none",
             }}
             whileHover={players.length > 0 ? { scale: 1.02 } : {}}

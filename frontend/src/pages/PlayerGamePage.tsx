@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { Check, X } from "lucide-react";
-import { CrescentIcon } from "../components/icons";
+
 import { LeaderboardDisplay } from "../components/LeaderboardDisplay";
 import { PodiumScreen } from "../components/PodiumScreen";
 import { useWebSocket } from "../hooks/useWebSocket";
@@ -28,7 +28,7 @@ interface AnswerRevealPayload {
 
 type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "podium" | "ended";
 
-// ── Countdown ring (unchanged logic, Ramadan styling) ───────────────────────
+// ── Countdown ring (unchanged logic, {import.meta.env.VITE_APP_NAME || 'Kahoot'} styling) ───────────────────────
 function CountdownRing({ timeLimit, startedAt }: { timeLimit: number; startedAt: number }) {
   const [remaining, setRemaining] = useState(timeLimit);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -49,12 +49,12 @@ function CountdownRing({ timeLimit, startedAt }: { timeLimit: number; startedAt:
   const progress = remaining / timeLimit;
   const strokeDashoffset = circumference * (1 - progress);
   const isUrgent = remaining <= timeLimit * 0.25;
-  const color = isUrgent ? "#f44336" : remaining > timeLimit * 0.5 ? "#f5c842" : "#ff6b35";
+  const color = isUrgent ? "#f44336" : remaining > timeLimit * 0.5 ? "#0136fe" : "#ff6b35";
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
       <svg className="absolute inset-0 -rotate-90" width="96" height="96" viewBox="0 0 96 96">
-        <circle cx="48" cy="48" r={radius} fill="none" stroke="rgba(245,200,66,0.2)" strokeWidth="8" />
+        <circle cx="48" cy="48" r={radius} fill="none" stroke="rgba(1,54,254,0.2)" strokeWidth="8" />
         <circle cx="48" cy="48" r={radius} fill="none" stroke={color} strokeWidth="8"
           strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
           style={{
@@ -150,17 +150,17 @@ export function PlayerGamePage() {
   // ── Ended ────────────────────────────────────────────────────────────────
   if (phase === "ended") {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
           <motion.div className="text-center w-full max-w-sm p-8 rounded-3xl"
-            style={{ background: "linear-gradient(135deg, rgba(42,20,66,0.9) 0%, rgba(30,15,50,0.95) 100%)", boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,200,66,0.2)" }}
+            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)", boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(1,54,254,0.2)" }}
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
             <div className="text-5xl mb-4">🚫</div>
-            <h1 className="text-2xl font-bold text-white mb-2">Game Ended</h1>
-            <p className="mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>The host ended the session early.</p>
+            <h1 className="text-2xl font-bold text-[#0136fe] mb-2">Game Ended</h1>
+            <p className="mb-6" style={{ color: "rgba(1,54,254,0.8)" }}>The host ended the session early.</p>
             <motion.a href="/join" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="inline-block py-3 px-6 rounded-xl font-bold text-white"
+              className="inline-block py-3 px-6 rounded-xl font-bold text-[#0136fe]"
               style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)" }}>
               Join another game
             </motion.a>
@@ -173,22 +173,22 @@ export function PlayerGamePage() {
   // ── Waiting ──────────────────────────────────────────────────────────────
   if (phase === "waiting") {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 min-h-screen flex items-center justify-center">
           <div className="text-center">
             <motion.div animate={{ y: [0, -15, 0], rotate: [-3, 3, -3] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
-              <CrescentIcon className="w-20 h-20 mx-auto drop-shadow-[0_0_30px_rgba(245,200,66,0.8)]" style={{ color: "#f5c842" }} />
+              <img src="/favicon.png" alt="Logo" className="w-12 h-12 mx-auto object-contain drop-shadow-md" />
             </motion.div>
             <div className="flex gap-3 justify-center mt-8">
               {[0, 1, 2].map((i) => (
-                <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#f5c842" }}
+                <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#0136fe" }}
                   animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }} />
               ))}
             </div>
-            <p className="mt-4 font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>Get ready…</p>
+            <p className="mt-4 font-medium" style={{ color: "rgba(1,54,254,0.8)" }}>Get ready…</p>
           </div>
         </div>
       </div>
@@ -203,15 +203,15 @@ export function PlayerGamePage() {
   // ── Leaderboard ──────────────────────────────────────────────────────────
   if (phase === "leaderboard") {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 min-h-screen flex flex-col px-6 py-8 max-w-md mx-auto">
           <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center justify-center gap-3 mb-2">
-              <CrescentIcon className="w-8 h-8" style={{ color: "#f5c842" }} />
-              <h1 className="text-3xl font-black" style={{ color: "#f5c842" }}>Leaderboard</h1>
+              <img src="/favicon.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow-md" />
+              <h1 className="text-3xl font-black" style={{ color: "#0136fe" }}>Leaderboard</h1>
             </div>
-            <p style={{ color: "rgba(255,255,255,0.7)" }}>Waiting for host…</p>
+            <p style={{ color: "rgba(1,54,254,0.8)" }}>Waiting for host…</p>
           </motion.div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
@@ -230,8 +230,8 @@ export function PlayerGamePage() {
     const opts = currentQuestion.question.options;
 
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
         <div className="relative z-10 min-h-screen flex flex-col px-6 py-8 max-w-md mx-auto">
           {/* Answer tiles */}
           <div className="grid grid-cols-1 gap-4 mb-6">
@@ -252,15 +252,15 @@ export function PlayerGamePage() {
                   transition={{ delay: i * 0.08, scale: { duration: 0.5, repeat: isCorrectOpt ? 2 : 0 } }}>
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl flex-shrink-0"
-                      style={{ background: isCorrectOpt ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)", color: "white" }}>
+                      style={{ background: isCorrectOpt ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)", color: "#0136fe" }}>
                       {String.fromCharCode(65 + i)}
                     </div>
-                    <p className="text-white font-medium flex-1 leading-tight">{opt.text}</p>
+                    <p className="text-[#0136fe] font-medium flex-1 leading-tight">{opt.text}</p>
                     {isCorrectOpt && (
                       <motion.div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                         style={{ background: "rgba(255,255,255,0.3)" }}
                         initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.4, type: "spring", stiffness: 200 }}>
-                        <Check className="w-6 h-6 text-white" strokeWidth={3} />
+                        <Check className="w-6 h-6 text-[#0136fe]" strokeWidth={3} />
                       </motion.div>
                     )}
                     {!isCorrectOpt && wasSelected && (
@@ -281,10 +281,10 @@ export function PlayerGamePage() {
             transition={{ type: "spring", stiffness: 200 }}>
             {isCorrect ? (
               <motion.div className="inline-block px-8 py-4 rounded-2xl"
-                style={{ background: "linear-gradient(135deg, #f5c842 0%, #ffd700 100%)", boxShadow: "0 10px 40px rgba(245,200,66,0.6)" }}
+                style={{ background: "linear-gradient(135deg, #0136fe 0%, #ffd700 100%)", boxShadow: "0 10px 40px rgba(1,54,254,0.6)" }}
                 animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 0.5, repeat: 2 }}>
-                <p className="font-black text-2xl" style={{ color: "#1a0a2e" }}>Correct!</p>
-                <p className="font-black text-4xl" style={{ color: "#1a0a2e" }}>+{points}</p>
+                <p className="font-black text-2xl" style={{ color: "#b7f700" }}>Correct!</p>
+                <p className="font-black text-4xl" style={{ color: "#b7f700" }}>+{points}</p>
               </motion.div>
             ) : (
               <div className="inline-block px-8 py-4 rounded-2xl"
@@ -294,7 +294,7 @@ export function PlayerGamePage() {
             )}
           </motion.div>
 
-          <p className="text-center text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Leaderboard incoming…</p>
+          <p className="text-center text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Leaderboard incoming…</p>
         </div>
       </div>
     );
@@ -306,8 +306,8 @@ export function PlayerGamePage() {
     const selectedOptIndex = opts.findIndex(o => o.id === selectedOptionId);
 
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#1a0a2e" }}>
-        <div className="ramadan-pattern" />
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#b7f700" }}>
+        <div className="fun-pattern" />
 
         <div className="relative z-10 min-h-screen flex flex-col px-6 py-8 max-w-md mx-auto">
           {/* Timer */}
@@ -318,12 +318,12 @@ export function PlayerGamePage() {
           {/* Question header */}
           <motion.div className="mb-6 text-center px-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <div className="flex items-center justify-center gap-2 mb-3">
-              <CrescentIcon className="w-5 h-5" style={{ color: "#f5c842" }} />
-              <p className="text-sm font-medium" style={{ color: "#f5c842" }}>
+              <img src="/favicon.png" alt="Logo" className="w-5 h-5 object-contain drop-shadow-md" />
+              <p className="text-sm font-medium" style={{ color: "#0136fe" }}>
                 Question {currentQuestion.question_index + 1} of {currentQuestion.total_questions}
               </p>
             </div>
-            <h2 className="text-xl font-bold text-white leading-snug">{currentQuestion.question.text}</h2>
+            <h2 className="text-xl font-bold text-[#0136fe] leading-snug">{currentQuestion.question.text}</h2>
           </motion.div>
 
           {/* Answer tiles — hidden once an answer is locked in */}
@@ -337,21 +337,21 @@ export function PlayerGamePage() {
               {/* Neutral locked-in card — no correct/incorrect colours */}
               <div className="w-full rounded-3xl p-8 text-center"
                 style={{
-                  background: "rgba(245,200,66,0.08)",
-                  border: "2px solid rgba(245,200,66,0.35)",
-                  boxShadow: "0 0 40px rgba(245,200,66,0.1)",
+                  background: "rgba(1,54,254,0.08)",
+                  border: "2px solid rgba(1,54,254,0.35)",
+                  boxShadow: "0 0 40px rgba(1,54,254,0.1)",
                 }}>
                 <motion.div
                   className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: "rgba(245,200,66,0.15)", border: "2px solid rgba(245,200,66,0.4)" }}
+                  style={{ background: "rgba(1,54,254,0.15)", border: "2px solid rgba(1,54,254,0.4)" }}
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <Check className="w-8 h-8" style={{ color: "#f5c842" }} />
+                  <Check className="w-8 h-8" style={{ color: "#0136fe" }} />
                 </motion.div>
-                <p className="text-lg font-bold text-white mb-2">Answer locked in!</p>
+                <p className="text-lg font-bold text-[#0136fe] mb-2">Answer locked in!</p>
                 {selectedOptIndex >= 0 && (
-                  <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <p className="text-sm font-medium" style={{ color: "rgba(1,54,254,0.8)" }}>
                     {String.fromCharCode(65 + selectedOptIndex)}: {opts[selectedOptIndex].text}
                   </p>
                 )}
@@ -361,12 +361,12 @@ export function PlayerGamePage() {
               <div className="flex items-center gap-2">
                 {[0, 1, 2].map(i => (
                   <motion.div key={i} className="w-2 h-2 rounded-full"
-                    style={{ background: "rgba(245,200,66,0.6)" }}
+                    style={{ background: "rgba(1,54,254,0.6)" }}
                     animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
                     transition={{ duration: 1, repeat: Infinity, delay: i * 0.3 }}
                   />
                 ))}
-                <p className="text-sm ml-1" style={{ color: "rgba(255,255,255,0.5)" }}>Waiting for others…</p>
+                <p className="text-sm ml-1" style={{ color: "rgba(1,54,254,0.7)" }}>Waiting for others…</p>
               </div>
             </motion.div>
           ) : (
@@ -391,10 +391,10 @@ export function PlayerGamePage() {
                       initial={{ x: "-100%" }} whileHover={{ x: "100%" }} transition={{ duration: 0.6 }} />
                     <div className="relative z-10 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0"
-                        style={{ background: "rgba(255,255,255,0.25)", color: "white" }}>
+                        style={{ background: "rgba(255,255,255,0.25)", color: "#0136fe" }}>
                         {String.fromCharCode(65 + i)}
                       </div>
-                      <p className="text-white font-medium leading-tight">{opt.text}</p>
+                      <p className="text-[#0136fe] font-medium leading-tight">{opt.text}</p>
                     </div>
                   </motion.button>
                 );

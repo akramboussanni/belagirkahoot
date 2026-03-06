@@ -17,11 +17,11 @@ import { LandingPage } from "./pages/LandingPage";
 import { useAuthStore } from "./stores/authStore";
 
 const NotFound = () => (
-  <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center" style={{ background: "#1a0a2e" }}>
-    <div className="ramadan-pattern" />
-    <div className="relative z-10 text-center text-white">
-      <h1 className="text-6xl font-black" style={{ color: "#f5c842" }}>404</h1>
-      <p className="mt-2" style={{ color: "rgba(255,255,255,0.5)" }}>Page not found</p>
+  <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center" style={{ background: "#b7f700" }}>
+    <div className="fun-pattern" />
+    <div className="relative z-10 text-center text-[#0136fe]">
+      <h1 className="text-6xl font-black" style={{ color: "#0136fe" }}>404</h1>
+      <p className="mt-2" style={{ color: "rgba(1, 54, 254, 0.7)" }}>Page not found</p>
     </div>
   </div>
 );

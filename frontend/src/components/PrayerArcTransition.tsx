@@ -69,7 +69,7 @@ export function PrayerArcTransition({ onComplete }: Props) {
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center"
-      style={{ background: "#1a0a2e" }}
+      style={{ background: "#b7f700" }}
     >
       <style>{`
         @keyframes arcDraw {
@@ -89,7 +89,7 @@ export function PrayerArcTransition({ onComplete }: Props) {
         <path
           d={ARC_PATH}
           fill="none"
-          stroke="rgba(245,200,66,0.15)"
+          stroke="rgba(1,54,254,0.15)"
           strokeWidth={4}
           strokeLinecap="round"
         />
@@ -98,14 +98,14 @@ export function PrayerArcTransition({ onComplete }: Props) {
         <path
           d={ARC_PATH}
           fill="none"
-          stroke="#f5c842"
+          stroke="#0136fe"
           strokeWidth={4}
           strokeLinecap="round"
           style={{
             strokeDasharray: ARC_LENGTH,
             strokeDashoffset: ARC_LENGTH,
             animation: `arcDraw ${ANIMATION_MS}ms linear forwards`,
-            filter: "drop-shadow(0 0 8px rgba(245,200,66,0.7))",
+            filter: "drop-shadow(0 0 8px rgba(1,54,254,0.7))",
           }}
         />
 
@@ -119,10 +119,10 @@ export function PrayerArcTransition({ onComplete }: Props) {
               cx={pos.x}
               cy={pos.y}
               r={6}
-              fill={lit ? "#f5c842" : "rgba(245,200,66,0.25)"}
+              fill={lit ? "#0136fe" : "rgba(1,54,254,0.25)"}
               style={{
                 transition: "fill 0.3s ease",
-                filter: lit ? "drop-shadow(0 0 6px rgba(245,200,66,0.9))" : "none",
+                filter: lit ? "drop-shadow(0 0 6px rgba(1,54,254,0.9))" : "none",
               }}
             />
           );
@@ -146,7 +146,7 @@ export function PrayerArcTransition({ onComplete }: Props) {
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.05em",
-              color: litDots[i] ? "#f5c842" : "rgba(245,200,66,0.3)",
+              color: litDots[i] ? "#0136fe" : "rgba(1,54,254,0.3)",
               transition: "color 0.3s ease",
               textAlign: "center",
               width: 56,

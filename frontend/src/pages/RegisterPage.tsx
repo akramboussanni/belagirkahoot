@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { CrescentIcon, LanternIcon } from "../components/icons";
+
 import { register } from "../api/auth";
 import { useAuthStore } from "../stores/authStore";
 
@@ -44,15 +44,15 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4" style={{ background: "#1a0a2e" }}>
-      <div className="ramadan-pattern" />
+    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4" style={{ background: "#b7f700" }}>
+      <div className="fun-pattern" />
 
       {/* Floating lanterns */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-24 pointer-events-none">
         {[{ delay: 0, rot: [-5, 5, -5] as [number, number, number] }, { delay: 0.5, rot: [5, -5, 5] as [number, number, number] }].map((l, i) => (
           <motion.div key={i} animate={{ y: [0, -12, 0], rotate: l.rot }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: l.delay }}>
-            <LanternIcon className="w-10 h-10 drop-shadow-[0_0_15px_rgba(245,200,66,0.6)]" style={{ color: "#f5c842" }} />
+            
           </motion.div>
         ))}
       </div>
@@ -62,22 +62,22 @@ export function RegisterPage() {
         <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="relative">
-              <CrescentIcon className="w-10 h-10" style={{ color: "#f5c842" }} />
-              <LanternIcon className="w-5 h-5 absolute -bottom-1 -right-1" style={{ color: "#f5c842" }} />
+              <img src="/favicon.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" />
+              
             </div>
-            <span className="text-3xl font-black" style={{ color: "#f5c842", textShadow: "0 0 20px rgba(245,200,66,0.4)" }}>
-              Hilal
+            <span className="text-3xl font-black" style={{ color: "#0136fe", textShadow: "0 0 20px rgba(1,54,254,0.4)" }}>
+              {import.meta.env.VITE_APP_NAME || 'Kahoot'}
             </span>
           </div>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Create an admin account</p>
+          <p className="text-sm" style={{ color: "rgba(1,54,254,0.7)" }}>Create an admin account</p>
         </motion.div>
 
         {/* Card */}
         <motion.div
           className="rounded-2xl p-8 space-y-5"
           style={{
-            background: "linear-gradient(135deg, rgba(42,20,66,0.9) 0%, rgba(30,15,50,0.95) 100%)",
-            border: "1px solid rgba(245,200,66,0.2)",
+            background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%)",
+            border: "1px solid rgba(1,54,254,0.2)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
           }}
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -93,7 +93,7 @@ export function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.7)" }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
                 Email
               </label>
               <input
@@ -102,16 +102,16 @@ export function RegisterPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm text-white outline-none transition"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(245,200,66,0.2)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+                className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
+                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
                 placeholder="admin@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.7)" }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
                 Password <span className="font-normal" style={{ color: "rgba(255,255,255,0.35)" }}>(min. 8 chars)</span>
               </label>
               <input
@@ -121,16 +121,16 @@ export function RegisterPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm text-white outline-none transition"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(245,200,66,0.2)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+                className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
+                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
                 placeholder="••••••••"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.7)" }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
                 Confirm password
               </label>
               <input
@@ -139,10 +139,10 @@ export function RegisterPage() {
                 required
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm text-white outline-none transition"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(245,200,66,0.2)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+                className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
+                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
                 placeholder="••••••••"
               />
             </div>
@@ -150,7 +150,7 @@ export function RegisterPage() {
             <motion.button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-white"
+              className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-[#0136fe]"
               style={{
                 background: loading ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
                 boxShadow: loading ? "none" : "0 8px 25px rgba(255,107,53,0.35)",
@@ -163,7 +163,7 @@ export function RegisterPage() {
 
           <p className="text-center text-sm pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold transition" style={{ color: "#f5c842" }}>
+            <Link to="/login" className="font-semibold transition" style={{ color: "#0136fe" }}>
               Sign in
             </Link>
           </p>

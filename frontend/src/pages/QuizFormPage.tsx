@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, Trash2, Check, Sparkles } from "lucide-react";
-import { CrescentIcon } from "../components/icons";
+
 import { getQuiz, createQuiz, updateQuiz } from "../api/quizzes";
 import type { Quiz } from "../types";
 import type { QuestionInput } from "../api/quizzes";
@@ -118,16 +118,16 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
 
   const inputStyle = {
     background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(245,200,66,0.2)",
-    color: "white",
+    border: "1px solid rgba(1,54,254,0.2)",
+    color: "#0136fe",
   };
 
   return (
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <motion.div className="flex items-center gap-3 mb-8" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <CrescentIcon className="w-6 h-6" style={{ color: "#f5c842" }} />
-        <h2 className="text-2xl font-black text-white">{isEdit ? "Edit quiz" : "New quiz"}</h2>
+        <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
+        <h2 className="text-2xl font-black text-[#0136fe]">{isEdit ? "Edit quiz" : "New quiz"}</h2>
       </motion.div>
 
       {!isEdit && (
@@ -137,11 +137,11 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
             onClick={() => setShowAIModal(true)}
             className="w-full mb-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 relative overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #f5c842 0%, #ff6b35 100%)",
-              color: "white",
-              boxShadow: "0 6px 28px rgba(245,200,66,0.4)",
+              background: "linear-gradient(135deg, #0136fe 0%, #ff6b35 100%)",
+              color: "#0136fe",
+              boxShadow: "0 6px 28px rgba(1,54,254,0.4)",
             }}
-            whileHover={{ scale: 1.01, boxShadow: "0 10px 36px rgba(245,200,66,0.55)" }}
+            whileHover={{ scale: 1.01, boxShadow: "0 10px 36px rgba(1,54,254,0.55)" }}
             whileTap={{ scale: 0.99 }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}>
@@ -182,7 +182,7 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.7)" }}>Quiz title</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>Quiz title</label>
           <input
             type="text"
             required
@@ -190,8 +190,8 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
             onChange={(e) => setTitle(e.target.value)}
             className="w-full rounded-xl px-4 py-3 text-sm outline-none transition"
             style={inputStyle}
-            onFocus={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.6)")}
-            onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+            onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+            onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
             placeholder="e.g. General Knowledge"
           />
         </motion.div>
@@ -201,16 +201,16 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
           {questions.map((q, qIdx) => (
             <motion.div key={qIdx}
               className="p-5 rounded-2xl space-y-4"
-              style={{ background: "linear-gradient(135deg, rgba(42,20,66,0.8) 0%, rgba(30,15,50,0.9) 100%)", border: "1px solid rgba(245,200,66,0.15)" }}
+              style={{ background: "linear-gradient(135deg, rgba(42,20,66,0.8) 0%, rgba(30,15,50,0.9) 100%)", border: "1px solid rgba(1,54,254,0.15)" }}
               initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: qIdx * 0.04 }}>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
-                    style={{ background: "rgba(245,200,66,0.2)", color: "#f5c842" }}>
+                    style={{ background: "rgba(1,54,254,0.2)", color: "#0136fe" }}>
                     {qIdx + 1}
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Question {qIdx + 1}</span>
+                  <span className="text-sm font-semibold" style={{ color: "rgba(1,54,254,0.8)" }}>Question {qIdx + 1}</span>
                 </div>
                 {questions.length > 1 && (
                   <button type="button" onClick={() => removeQuestion(qIdx)} aria-label="Remove"
@@ -227,13 +227,13 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
                 onChange={(e) => updateQuestion(qIdx, { text: e.target.value })}
                 className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition"
                 style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
                 placeholder="Question text"
               />
 
               <div className="flex items-center gap-3">
-                <label className="text-xs whitespace-nowrap" style={{ color: "rgba(255,255,255,0.5)" }}>Time limit (s)</label>
+                <label className="text-xs whitespace-nowrap" style={{ color: "rgba(1,54,254,0.7)" }}>Time limit (s)</label>
                 <input
                   type="number"
                   min={5}
@@ -242,8 +242,8 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
                   onChange={(e) => updateQuestion(qIdx, { time_limit: Number(e.target.value) })}
                   className="w-20 rounded-lg px-3 py-1.5 text-sm outline-none transition"
                   style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.6)")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
                 />
               </div>
 
@@ -273,7 +273,7 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
                         className="flex-1 rounded-xl px-3 py-2 text-sm outline-none transition"
                         style={inputStyle}
                         onFocus={(e) => (e.target.style.borderColor = color)}
-                        onBlur={(e) => (e.target.style.borderColor = "rgba(245,200,66,0.2)")}
+                        onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
                         placeholder={`Option ${oIdx + 1}`}
                       />
                       {q.options.length > 2 && (
@@ -288,7 +288,7 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
                 {q.options.length < 4 && (
                   <button type="button" onClick={() => addOption(qIdx)}
                     className="text-xs font-medium transition mt-1 flex items-center gap-1"
-                    style={{ color: "#f5c842" }}>
+                    style={{ color: "#0136fe" }}>
                     <Plus className="w-3 h-3" /> Add option
                   </button>
                 )}
@@ -300,8 +300,8 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
             type="button"
             onClick={addQuestion}
             className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition"
-            style={{ border: "2px dashed rgba(245,200,66,0.3)", color: "rgba(245,200,66,0.7)" }}
-            whileHover={{ borderColor: "rgba(245,200,66,0.6)", color: "#f5c842" }}>
+            style={{ border: "2px dashed rgba(1,54,254,0.3)", color: "rgba(1,54,254,0.7)" }}
+            whileHover={{ borderColor: "rgba(1,54,254,0.6)", color: "#0136fe" }}>
             <Plus className="w-4 h-4" /> Add question
           </motion.button>
         </div>
@@ -319,7 +319,7 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
           <motion.button
             type="submit"
             disabled={mutation.isPending}
-            className="px-6 py-2.5 rounded-xl font-bold text-sm text-white disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl font-bold text-sm text-[#0136fe] disabled:cursor-not-allowed"
             style={{
               background: mutation.isPending ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
               boxShadow: mutation.isPending ? "none" : "0 6px 20px rgba(255,107,53,0.35)",
@@ -369,7 +369,7 @@ export function QuizFormPage() {
     return (
       <div className="flex gap-3 justify-center py-12">
         {[0, 1, 2].map((i) => (
-          <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#f5c842" }}
+          <motion.div key={i} className="w-3 h-3 rounded-full" style={{ background: "#0136fe" }}
             animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }} />
         ))}
