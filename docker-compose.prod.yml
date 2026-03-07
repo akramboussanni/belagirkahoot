@@ -43,19 +43,19 @@ services:
       - bridge
       - web
     environment:
-      PORT: "8080"
-      DATABASE_URL: "postgres://hilal:changeme@postgres:5432/hilal?sslmode=disable"
-      REDIS_URL: "redis://redis:6379"
-      JWT_SECRET: "change-me-in-production"
-      FRONTEND_URL: "http://localhost"
-      ANTHROPIC_API_KEY: ""
-      GEMINI_API_KEY: ""
-      AI_RATE_LIMIT_PER_HOUR: "5"
-      SMTP_HOST: "smtp.gmail.com"
-      SMTP_PORT: "587"
-      SMTP_USER: ""
-      SMTP_PASS: ""
-      SMTP_FROM: "noreply@hilal.app"
+      PORT: "${PORT:-8080}"
+      DATABASE_URL: "${DATABASE_URL:-postgres://hilal:changeme@postgres:5432/hilal?sslmode=disable}"
+      REDIS_URL: "${REDIS_URL:-redis://redis:6379}"
+      JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      AI_RATE_LIMIT_PER_HOUR: "${AI_RATE_LIMIT_PER_HOUR:-5}"
+      SMTP_HOST: "${SMTP_HOST:-smtp.gmail.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      SMTP_FROM: "${SMTP_FROM:-noreply@hilal.app}"
     expose:
       - "8080"
 
