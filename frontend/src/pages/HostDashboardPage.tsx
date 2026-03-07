@@ -45,6 +45,7 @@ export function HostDashboardPage() {
             {[
               { to: "/host/quizzes", label: "Mes Quiz" },
               { to: "/host/history", label: "Historique" },
+              { to: "/join", label: "Rejoindre" },
             ].map((link) => (
               <NavLink
                 key={link.to}
