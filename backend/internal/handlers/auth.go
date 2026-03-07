@@ -91,7 +91,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	// Send welcome email asynchronously
 	go func() {
 		log.Printf("Attempting to send verification email to %s using template 'welcome.html'", host.Email)
-		subject := fmt.Sprintf("Welcome to %s - Verify your email", h.config.AppName)
+		subject := fmt.Sprintf("Bienvenue sur %s - Vérifiez votre adresse e-mail", h.config.AppName)
 		data := struct {
 			AppName         string
 			VerificationURL string

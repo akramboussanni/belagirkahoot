@@ -21,7 +21,6 @@ type Mailer struct {
 }
 
 func New(host, portStr, user, pass, from string) *Mailer {
-	log.Printf("DEBUG SMTP: host=%s, port=%s, user=%s, pass=%s, from=%s", host, portStr, user, pass, from)
 	tmpl, err := template.ParseFS(templateFS, "templates/*.html")
 	if err != nil {
 		log.Printf("Warning: failed to parse email templates: %v", err)

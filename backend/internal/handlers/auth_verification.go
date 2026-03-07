@@ -77,7 +77,7 @@ func (h *Handler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// Always return OK to prevent email enumeration
 	if res.RowsAffected() > 0 {
 		go func() {
-			subject := fmt.Sprintf("Reset your password - %s", h.config.AppName)
+			subject := fmt.Sprintf("Réinitialisez votre mot de passe - %s", h.config.AppName)
 			data := struct {
 				AppName  string
 				ResetURL string
