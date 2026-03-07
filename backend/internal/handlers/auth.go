@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 	"time"
@@ -89,6 +90,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// Send welcome email asynchronously
 	go func() {
+		log.Printf("Attempting to send verification email to %s using template 'welcome.html'", host.Email)
 		subject := fmt.Sprintf("Welcome to %s - Verify your email", h.config.AppName)
 		data := struct {
 			AppName         string
@@ -99,7 +101,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 			VerificationURL: fmt.Sprintf("%s/verify-email?token=%s", h.config.FrontendURL, verToken),
 			Year:            time.Now().Year(),
 		}
-		_ = h.mailer.SendTemplateEmail([]string{host.Email}, subject, "welcome.html", data)
+		err := h.mailer.SendTemplateEmail([]string{host.Email}, subject, "welcome.html", data)
+		if err != nil {
+			log.Printf("ERROR: Failed to send verification email to %s: %v", host.Email, err)
+		} else {
+			log.Printf("SUCCESS: Dispatched verification email to %s", host.Email)
+		}
 	}()
 
 	writeJSON(w, http.StatusCreated, map[string]string{
