@@ -19,6 +19,7 @@ RUN pnpm install --frozen-lockfile
 COPY frontend/ .
 ARG VITE_WS_BASE_URL
 ENV VITE_WS_BASE_URL=$VITE_WS_BASE_URL
+ENV VITE_APP_NAME="Jeunesse Bel Agir"
 RUN pnpm build
 
 # ── Prod stage (nginx) ───────────────────────────────────────────────────────────
