@@ -67,19 +67,22 @@ function PodiumBlock({
         className={`${rank === 1 ? "w-36" : "w-32"} rounded-t-2xl px-3 py-4 text-center relative overflow-hidden`}
         style={{ height: `${height}px`, background: bgColor, border: `3px solid ${borderColor}`, borderBottom: "none" }}
       >
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-0" />
         {rank === 1 && (
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent z-0"
             animate={{ x: ["-100%", "200%"] }}
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-            style={{ opacity: 0.3 }}
+            style={{ opacity: 0.5 }}
           />
         )}
-        <p className="font-bold text-sm truncate mb-1" style={{ color: "#0136fe" }}>{entry.name}{isSelf ? " (vous)" : ""}</p>
-        <p className={`font-black ${rank === 1 ? "text-3xl" : "text-2xl"}`} style={{ color: borderColor, textShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>{entry.score}</p>
-        <p className="text-xs mt-1 font-bold" style={{ color: borderColor }}>
-          {rank === 1 ? "CHAMPION !" : rank === 2 ? "2ème Place" : "3ème Place"}
-        </p>
+        <div className="relative z-10">
+          <p className="font-bold text-sm truncate mb-1" style={{ color: "white" }}>{entry.name}{isSelf ? " (vous)" : ""}</p>
+          <p className={`font-black ${rank === 1 ? "text-3xl" : "text-2xl"}`} style={{ color: "white", textShadow: `0 2px 4px ${borderColor}80` }}>{entry.score}</p>
+          <p className="text-xs mt-1 font-bold" style={{ color: "white" }}>
+            {rank === 1 ? "CHAMPION !" : rank === 2 ? "2ème Place" : "3ème Place"}
+          </p>
+        </div>
       </div>
     </motion.div>
   );

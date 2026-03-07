@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ChevronRight, Check } from "lucide-react";
+import toast from "react-hot-toast";
 
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
@@ -81,7 +82,13 @@ export function HostGamePage() {
   const { send } = useWebSocket({
     url: `${WS_BASE}/api/v1/ws/host/${code}`,
     onOpen: () => setWsReady(true),
-    onClose: () => setWsReady(false),
+    onClose: (event) => {
+      setWsReady(false);
+      if (event && event.code && event.code !== 1000 && event.code !== 1001) {
+          toast.error("Session invalide ou terminée");
+          navigate("/host");
+      }
+    },
     onMessage: useCallback((msg: WsMessage) => {
       switch (msg.type) {
         case "question": {
@@ -166,9 +173,9 @@ export function HostGamePage() {
 
   if (phase === "waiting") {
     return wrapContent(
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh]">
         <GameBrand />
-        <p className="mt-8 font-black text-2xl uppercase tracking-[0.2em] animate-pulse" style={{ color: "#0136fe" }}>Démarrage en cours…</p>
+        <p className="mt-8 font-black text-2xl uppercase tracking-[0.2em] animate-pulse text-center" style={{ color: "#0136fe" }}>Démarrage en cours…</p>
         <div className="flex items-center justify-center gap-3 mt-4">
           <span className={`w-3 h-3 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} shadow-lg`} />
           <p className="text-sm font-bold uppercase tracking-widest" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
