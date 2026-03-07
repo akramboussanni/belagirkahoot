@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { ArrowLeft } from "lucide-react";
 
 import { joinSession } from "../api/sessions";
 import { GameBackground } from "../components/GameBackground";
@@ -50,6 +51,21 @@ export function JoinPage() {
   return (
     <GameBackground>
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
+        {/* Back button */}
+        <motion.div
+          className="absolute top-6 left-6 z-20"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <Link
+            to="/"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm bg-white shadow-lg shadow-black/5 transition-transform hover:scale-105 active:scale-95"
+            style={{ color: "#0136fe" }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Retour
+          </Link>
+        </motion.div>
         {/* Floating lanterns */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-24 pointer-events-none">
           {[{ delay: 0, rot: [-5, 5, -5] as [number, number, number] }, { delay: 0.5, rot: [5, -5, 5] as [number, number, number] }].map((l, i) => (

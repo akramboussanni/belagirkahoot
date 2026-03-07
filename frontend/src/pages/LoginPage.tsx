@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
+import { ArrowLeft } from "lucide-react";
 
 import { login } from "../api/auth";
 import { useAuthStore } from "../stores/authStore";
@@ -39,6 +40,22 @@ export function LoginPage() {
   return (
     <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center px-4" style={{ background: "#b7f700" }}>
       <div className="fun-pattern" />
+
+      {/* Back button */}
+      <motion.div
+        className="absolute top-6 left-6 z-20"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm bg-white shadow-lg shadow-black/5 transition-transform hover:scale-105 active:scale-95"
+          style={{ color: "#0136fe" }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Retour
+        </Link>
+      </motion.div>
 
       {/* Floating lanterns */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-24 pointer-events-none">
