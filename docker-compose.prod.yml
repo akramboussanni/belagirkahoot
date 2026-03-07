@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: "hilal"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - bridge
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U hilal" ]
       interval: 10s
@@ -21,6 +23,8 @@ services:
     restart: always
     volumes:
       - redisdata:/data
+    networks:
+      - bridge
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -35,6 +39,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - bridge
+      - web
     environment:
       PORT: "8080"
       DATABASE_URL: "postgres://hilal:changeme@postgres:5432/hilal?sslmode=disable"
@@ -57,6 +64,8 @@ services:
     restart: always
     depends_on:
       - backend
+    networks:
+      - web
     ports:
       - "80:80"
       - "443:443"
@@ -64,3 +73,10 @@ services:
 volumes:
   pgdata:
   redisdata:
+
+
+networks:
+  bridge:
+    driver: bridge
+  web:
+    external: true
