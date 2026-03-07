@@ -262,14 +262,14 @@ export function PodiumScreen({ entries, playerId, onEnd, endLabel = "Retour au t
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
           {onEnd ? (
             <motion.button onClick={onEnd} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="w-full py-4 rounded-xl font-bold text-lg text-[#0136fe]"
-              style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", boxShadow: "0 8px 30px rgba(255,107,53,0.4)" }}>
+              className="w-full py-4 rounded-xl font-bold text-lg text-white"
+              style={{ background: "#0136fe", boxShadow: "0 8px 30px rgba(1,54,254,0.4)" }}>
               {endLabel}
             </motion.button>
           ) : (
             <motion.a href="/join" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="w-full block text-center py-4 rounded-xl font-bold text-lg text-[#0136fe]"
-              style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", boxShadow: "0 8px 30px rgba(255,107,53,0.4)" }}>
+              className="w-full block text-center py-4 rounded-xl font-bold text-lg text-white"
+              style={{ background: "#0136fe", boxShadow: "0 8px 30px rgba(1,54,254,0.4)" }}>
               Rejouer
             </motion.a>
           )}

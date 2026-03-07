@@ -52,7 +52,7 @@ export function QuizListPage() {
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Link to="/host/quizzes/new"
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)", color: "#0136fe", boxShadow: "0 4px 20px rgba(255,107,53,0.4)" }}>
+            style={{ background: "#0136fe", color: "white", boxShadow: "0 4px 20px rgba(1,54,254,0.4)" }}>
             <Plus className="w-4 h-4" />
             Nouveau Quiz
           </Link>
@@ -108,7 +108,7 @@ export function QuizListPage() {
               }}>
 
               {/* Top Accent */}
-              <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: i % 2 === 0 ? "#0136fe" : "#ff6b35" }} />
+              <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: "#0136fe" }} />
 
               {/* Quiz info */}
               <div className="mb-6">

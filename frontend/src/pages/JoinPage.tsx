@@ -121,8 +121,8 @@ export function JoinPage() {
             <motion.button
               type="submit"
               disabled={!isReady || loading}
-              className="w-full py-5 rounded-2xl font-black text-xl text-white uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-[0_10px_30px_rgba(255,107,53,0.3)]"
-              style={{ background: "#ff6b35" }}
+              className="w-full py-5 rounded-2xl font-black text-xl text-white uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-[0_10px_30px_rgba(1,54,254,0.3)]"
+              style={{ background: "#0136fe" }}
               whileHover={isReady && !loading ? { scale: 1.02, y: -2 } : {}}
               whileTap={isReady && !loading ? { scale: 0.98 } : {}}>
               {loading ? "Connexion..." : "C'est parti ! 🚀"}

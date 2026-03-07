@@ -130,10 +130,10 @@ export function LoginPage() {
             <motion.button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-[#0136fe]"
+              className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-white"
               style={{
-                background: loading ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
-                boxShadow: loading ? "none" : "0 8px 25px rgba(255,107,53,0.35)",
+                background: loading ? "rgba(1,54,254,0.4)" : "#0136fe",
+                boxShadow: loading ? "none" : "0 8px 25px rgba(1,54,254,0.35)",
               }}
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}>
@@ -141,7 +141,7 @@ export function LoginPage() {
             </motion.button>
           </form>
 
-          <p className="text-center text-sm pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <p className="text-center text-sm pt-1" style={{ color: "rgba(1,54,254,0.6)" }}>
             Pas de compte ?{" "}
             <Link to="/register" className="font-semibold transition" style={{ color: "#0136fe" }}>
               S'inscrire

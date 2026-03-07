@@ -161,10 +161,10 @@ export function RegisterPage() {
               <motion.button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-[#0136fe]"
+                className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-white"
                 style={{
-                  background: loading ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
-                  boxShadow: loading ? "none" : "0 8px 25px rgba(255,107,53,0.35)",
+                  background: loading ? "rgba(1,54,254,0.4)" : "#0136fe",
+                  boxShadow: loading ? "none" : "0 8px 25px rgba(1,54,254,0.35)",
                 }}
                 whileHover={!loading ? { scale: 1.02 } : {}}
                 whileTap={!loading ? { scale: 0.98 } : {}}>
