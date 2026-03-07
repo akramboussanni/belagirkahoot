@@ -14,6 +14,9 @@ import { JoinPage } from "./pages/JoinPage";
 import { PlayerLobbyPage } from "./pages/PlayerLobbyPage";
 import { PlayerGamePage } from "./pages/PlayerGamePage";
 import { LandingPage } from "./pages/LandingPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { useAuthStore } from "./stores/authStore";
 
 const NotFound = () => (
@@ -43,6 +46,9 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected host routes — dashboard shell */}
           <Route

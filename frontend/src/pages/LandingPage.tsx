@@ -38,9 +38,6 @@ export function LandingPage() {
               <h1 className="text-5xl sm:text-6xl font-black text-center tracking-tighter leading-none" style={{ color: "#0136fe" }}>
                 {import.meta.env.VITE_APP_NAME || "Kahoot"}
               </h1>
-              <p className="text-center font-bold text-sm uppercase tracking-[0.2em] mt-6" style={{ color: "rgba(1,54,254,0.6)" }}>
-                Défiez vos amis
-              </p>
             </div>
 
             <div className="w-full space-y-4">
