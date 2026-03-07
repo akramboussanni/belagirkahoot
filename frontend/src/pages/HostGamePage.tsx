@@ -31,12 +31,13 @@ interface HostQuestionPayload {
     id: string;
     text: string;
     time_limit: number;
+    allow_multiple_answers: boolean;
     options: HostOption[];
   };
 }
 
 interface AnswerRevealPayload {
-  correct_option_id: string;
+  correct_option_ids: string[];
   scores: Record<string, { is_correct: boolean; points: number; total_score: number }>;
 }
 
@@ -240,8 +241,11 @@ export function HostGamePage() {
             <span className="font-black text-sm uppercase tracking-widest px-3 py-1 rounded bg-[#b7f700] text-[#0136fe]">
               Q{currentQuestion.question_index + 1}
             </span>
-            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest opacity-40 text-[#0136fe]">
-              {currentQuestion.question_index + 1}/{currentQuestion.total_questions}
+            <div className="flex flex-col items-end gap-1 text-sm font-black uppercase tracking-widest opacity-40 text-[#0136fe]">
+              <span>{currentQuestion.question_index + 1}/{currentQuestion.total_questions}</span>
+              {currentQuestion.question.allow_multiple_answers && (
+                <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Plusieurs réponses</span>
+              )}
             </div>
           </div>
 

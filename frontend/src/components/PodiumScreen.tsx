@@ -77,9 +77,9 @@ function PodiumBlock({
           />
         )}
         <div className="relative z-10">
-          <p className="font-bold text-sm truncate mb-1" style={{ color: "white" }}>{entry.name}{isSelf ? " (vous)" : ""}</p>
-          <p className={`font-black ${rank === 1 ? "text-3xl" : "text-2xl"}`} style={{ color: "white", textShadow: `0 2px 4px ${borderColor}80` }}>{entry.score}</p>
-          <p className="text-xs mt-1 font-bold" style={{ color: "white" }}>
+          <p className="font-bold text-sm truncate mb-1" style={{ color: borderColor }}>{entry.name}{isSelf ? " (vous)" : ""}</p>
+          <p className={`font-black ${rank === 1 ? "text-3xl" : "text-2xl"}`} style={{ color: borderColor, textShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>{entry.score}</p>
+          <p className="text-xs mt-1 font-bold" style={{ color: borderColor }}>
             {rank === 1 ? "CHAMPION !" : rank === 2 ? "2ème Place" : "3ème Place"}
           </p>
         </div>

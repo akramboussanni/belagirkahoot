@@ -134,6 +134,8 @@ func (h *Handler) GenerateQuiz(w http.ResponseWriter, r *http.Request) {
 							"text":       {Type: genai.TypeString},
 							"time_limit": {Type: genai.TypeInteger},
 							"order":      {Type: genai.TypeInteger},
+							"randomize_options": {Type: genai.TypeBoolean},
+							"allow_multiple_answers": {Type: genai.TypeBoolean},
 							"options": {
 								Type: genai.TypeArray,
 								Items: &genai.Schema{
@@ -191,6 +193,8 @@ func (h *Handler) GenerateQuiz(w http.ResponseWriter, r *http.Request) {
 							"text":       map[string]any{"type": "string"},
 							"time_limit": map[string]any{"type": "integer"},
 							"order":      map[string]any{"type": "integer"},
+							"randomize_options": map[string]any{"type": "boolean"},
+							"allow_multiple_answers": map[string]any{"type": "boolean"},
 							"options": map[string]any{
 								"type": "array",
 								"items": map[string]any{
@@ -272,8 +276,12 @@ func (h *Handler) GenerateQuiz(w http.ResponseWriter, r *http.Request) {
 				correctCount++
 			}
 		}
-		if correctCount != 1 {
-			writeError(w, http.StatusBadGateway, "AI returned invalid response, please try again")
+		if correctCount < 1 {
+			writeError(w, http.StatusBadGateway, "AI returned invalid response (no correct answer), please try again")
+			return
+		}
+		if !q.AllowMultipleAnswers && correctCount != 1 {
+			writeError(w, http.StatusBadGateway, "AI returned invalid response (multiple correct answers for single-answer question), please try again")
 			return
 		}
 		_ = i

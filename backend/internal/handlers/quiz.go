@@ -44,10 +44,12 @@ type createQuizRequest struct {
 }
 
 type questionInputItem struct {
-	Text      string            `json:"text"`
-	TimeLimit int               `json:"time_limit"`
-	Order     int               `json:"order"`
-	Options   []optionInputItem `json:"options"`
+	Text                 string            `json:"text"`
+	TimeLimit            int               `json:"time_limit"`
+	Order                int               `json:"order"`
+	RandomizeOptions     bool              `json:"randomize_options"`
+	AllowMultipleAnswers bool              `json:"allow_multiple_answers"`
+	Options              []optionInputItem `json:"options"`
 }
 
 type optionInputItem struct {
@@ -94,8 +96,8 @@ func (h *Handler) CreateQuiz(w http.ResponseWriter, r *http.Request) {
 	for _, qi := range req.Questions {
 		qID := uuid.New()
 		_, err = tx.Exec(r.Context(),
-			`INSERT INTO questions (id, quiz_id, text, time_limit, "order") VALUES ($1, $2, $3, $4, $5)`,
-			qID, quizID, qi.Text, qi.TimeLimit, qi.Order,
+			`INSERT INTO questions (id, quiz_id, text, time_limit, "order", randomize_options, allow_multiple_answers) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			qID, quizID, qi.Text, qi.TimeLimit, qi.Order, qi.RandomizeOptions, qi.AllowMultipleAnswers,
 		)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "failed to create question")
@@ -135,7 +137,7 @@ func (h *Handler) GetQuiz(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rows, err := h.db.Query(r.Context(),
-		`SELECT id, quiz_id, text, time_limit, "order" FROM questions WHERE quiz_id = $1 ORDER BY "order"`, quizID,
+		`SELECT id, quiz_id, text, time_limit, "order", randomize_options, allow_multiple_answers FROM questions WHERE quiz_id = $1 ORDER BY "order"`, quizID,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to load questions")
@@ -145,7 +147,7 @@ func (h *Handler) GetQuiz(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var q models.Question
-		if err := rows.Scan(&q.ID, &q.QuizID, &q.Text, &q.TimeLimit, &q.Order); err != nil {
+		if err := rows.Scan(&q.ID, &q.QuizID, &q.Text, &q.TimeLimit, &q.Order, &q.RandomizeOptions, &q.AllowMultipleAnswers); err != nil {
 			writeError(w, http.StatusInternalServerError, "failed to scan question")
 			return
 		}
@@ -224,8 +226,8 @@ func (h *Handler) UpdateQuiz(w http.ResponseWriter, r *http.Request) {
 	for _, qi := range req.Questions {
 		qID := uuid.New()
 		if _, err = tx.Exec(r.Context(),
-			`INSERT INTO questions (id, quiz_id, text, time_limit, "order") VALUES ($1, $2, $3, $4, $5)`,
-			qID, quizID, qi.Text, qi.TimeLimit, qi.Order,
+			`INSERT INTO questions (id, quiz_id, text, time_limit, "order", randomize_options, allow_multiple_answers) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			qID, quizID, qi.Text, qi.TimeLimit, qi.Order, qi.RandomizeOptions, qi.AllowMultipleAnswers,
 		); err != nil {
 			writeError(w, http.StatusInternalServerError, "failed to update question")
 			return

@@ -17,6 +17,8 @@ interface OptionDraft {
 interface QuestionDraft {
   text: string;
   time_limit: number;
+  randomize_options?: boolean;
+  allow_multiple_answers?: boolean;
   options: OptionDraft[];
 }
 
@@ -25,7 +27,13 @@ function blankOption(): OptionDraft {
 }
 
 function blankQuestion(): QuestionDraft {
-  return { text: "", time_limit: 20, options: [blankOption(), blankOption()] };
+  return { 
+    text: "", 
+    time_limit: 20, 
+    randomize_options: false,
+    allow_multiple_answers: false,
+    options: [blankOption(), blankOption()] 
+  };
 }
 
 const OPTION_COLORS = ["#4caf50", "#2196f3", "#ff6b35", "#f44336"];
@@ -70,8 +78,9 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
         if (!q.options[j].text.trim())
           return `L'option ${j + 1} de la question ${i + 1} doit avoir un texte.`;
       }
-      if (q.options.filter((o) => o.is_correct).length !== 1)
-        return `La question ${i + 1} doit avoir exactement une option correcte.`;
+      const correctCount = q.options.filter((o) => o.is_correct).length;
+      if (q.allow_multiple_answers ? correctCount < 1 : correctCount !== 1)
+        return `La question ${i + 1} doit avoir ${q.allow_multiple_answers ? "au moins une" : "exactement une"} option correcte.`;
     }
     return null;
   }
@@ -87,6 +96,8 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
         text: q.text.trim(),
         time_limit: q.time_limit,
         order: i + 1,
+        randomize_options: !!q.randomize_options,
+        allow_multiple_answers: !!q.allow_multiple_answers,
         options: q.options.map((o) => ({ text: o.text.trim(), is_correct: o.is_correct })),
       })),
     });
@@ -103,9 +114,19 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
     ));
   }
   function setCorrect(qIdx: number, oIdx: number) {
-    setQuestions((qs) => qs.map((q, i) =>
-      i !== qIdx ? q : { ...q, options: q.options.map((o, j) => ({ ...o, is_correct: j === oIdx })) }
-    ));
+    setQuestions((qs) => qs.map((q, i) => {
+      if (i !== qIdx) return q;
+      if (q.allow_multiple_answers) {
+        return {
+          ...q,
+          options: q.options.map((o, j) => j === oIdx ? { ...o, is_correct: !o.is_correct } : o)
+        };
+      }
+      return {
+        ...q,
+        options: q.options.map((o, j) => ({ ...o, is_correct: j === oIdx }))
+      };
+    }));
   }
   function addOption(qIdx: number) {
     setQuestions((qs) => qs.map((q, i) => (i !== qIdx ? q : { ...q, options: [...q.options, blankOption()] })));
@@ -173,6 +194,8 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
                     data.questions.map((q) => ({
                       text: q.text,
                       time_limit: q.time_limit,
+                      randomize_options: true,
+                      allow_multiple_answers: false,
                       options: q.options.map((o) => ({ text: o.text, is_correct: o.is_correct })),
                     }))
                   );
@@ -248,17 +271,38 @@ function QuizForm({ quizID, initial }: QuizFormProps) {
                   />
                 </div>
 
-                <div className="flex items-center gap-4 bg-black/5 p-3 rounded-2xl w-fit">
-                  <label className="text-[10px] uppercase font-black tracking-widest opacity-50" style={{ color: "#0136fe" }}>Temps (s)</label>
-                  <input
-                    type="number"
-                    min={5}
-                    max={120}
-                    value={q.time_limit}
-                    onChange={(e) => updateQuestion(qIdx, { time_limit: Number(e.target.value) })}
-                    className="w-16 rounded-xl px-3 py-1.5 font-bold text-center text-sm outline-none bg-white shadow-sm"
-                    style={{ color: "#0136fe" }}
-                  />
+                <div className="flex items-center gap-4 bg-black/5 p-3 rounded-2xl w-fit flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[10px] uppercase font-black tracking-widest opacity-50" style={{ color: "#0136fe" }}>Temps (s)</label>
+                    <input
+                      type="number"
+                      min={5}
+                      max={120}
+                      value={q.time_limit}
+                      onChange={(e) => updateQuestion(qIdx, { time_limit: Number(e.target.value) })}
+                      className="w-16 rounded-xl px-3 py-1.5 font-bold text-center text-sm outline-none bg-white shadow-sm"
+                      style={{ color: "#0136fe" }}
+                    />
+                  </div>
+                  <div className="w-px h-6 bg-black/10 hidden sm:block"></div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={!!q.randomize_options} 
+                      onChange={(e) => updateQuestion(qIdx, { randomize_options: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#0136fe] focus:ring-[#0136fe] border-black/10"
+                    />
+                    <span className="text-[10px] uppercase font-black tracking-widest" style={{ color: "#0136fe" }}>Ordre aléatoire</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={!!q.allow_multiple_answers} 
+                      onChange={(e) => updateQuestion(qIdx, { allow_multiple_answers: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#0136fe] focus:ring-[#0136fe] border-black/10"
+                    />
+                    <span className="text-[10px] uppercase font-black tracking-widest" style={{ color: "#0136fe" }}>Réponses multiples</span>
+                  </label>
                 </div>
               </div>
 
@@ -372,6 +416,8 @@ function quizToInitial(quiz: Quiz) {
         ? quiz.questions.map((q) => ({
           text: q.text,
           time_limit: q.time_limit,
+          randomize_options: q.randomize_options,
+          allow_multiple_answers: q.allow_multiple_answers,
           options: q.options.map((o) => ({ text: o.text, is_correct: !!o.is_correct })),
         }))
         : [blankQuestion()],

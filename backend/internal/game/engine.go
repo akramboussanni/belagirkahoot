@@ -2,9 +2,11 @@ package game
 
 import (
 	"context"
+	crypto_rand "crypto/rand"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
 	"sync"
 	"time"
 
@@ -39,11 +41,13 @@ type GameState struct {
 
 // storedQuestion is the full question (including correct answers) cached in Redis.
 type storedQuestion struct {
-	ID        string         `json:"id"`
-	Text      string         `json:"text"`
-	TimeLimit int            `json:"time_limit"`
-	Order     int            `json:"order"`
-	Options   []storedOption `json:"options"`
+	ID                   string         `json:"id"`
+	Text                 string         `json:"text"`
+	TimeLimit            int            `json:"time_limit"`
+	Order                int            `json:"order"`
+	RandomizeOptions     bool           `json:"randomize_options"`
+	AllowMultipleAnswers bool           `json:"allow_multiple_answers"`
+	Options              []storedOption `json:"options"`
 }
 
 type storedOption struct {
@@ -54,7 +58,7 @@ type storedOption struct {
 
 // playerAnswer tracks a single player's answer in Redis.
 type playerAnswer struct {
-	OptionID   string    `json:"option_id"`
+	OptionIDs   []string  `json:"option_ids"`
 	AnsweredAt time.Time `json:"answered_at"`
 }
 
@@ -166,7 +170,7 @@ func (e *Engine) GetCurrentQuestion(ctx context.Context, sessionCode string) (*h
 }
 
 // SubmitAnswer records a player's answer and triggers reveal if all players have answered.
-func (e *Engine) SubmitAnswer(ctx context.Context, sessionCode, playerID, questionIDStr, optionIDStr string) error {
+func (e *Engine) SubmitAnswer(ctx context.Context, sessionCode, playerID, questionIDStr string, optionIDStrs []string) error {
 	state, err := e.loadState(ctx, sessionCode)
 	if err != nil {
 		return fmt.Errorf("load state: %w", err)
@@ -192,7 +196,7 @@ func (e *Engine) SubmitAnswer(ctx context.Context, sessionCode, playerID, questi
 	}
 
 	ans := playerAnswer{
-		OptionID:   optionIDStr,
+		OptionIDs:   optionIDStrs,
 		AnsweredAt: time.Now(),
 	}
 	ansData, _ := json.Marshal(ans)
@@ -335,12 +339,11 @@ func (e *Engine) triggerReveal(ctx context.Context, sessionCode string) error {
 	}
 	q := questions[state.CurrentIndex]
 
-	// Find correct option.
-	var correctOptionID string
+	// Find correct options.
+	var correctOptionIDs []string
 	for _, opt := range q.Options {
 		if opt.IsCorrect {
-			correctOptionID = opt.ID
-			break
+			correctOptionIDs = append(correctOptionIDs, opt.ID)
 		}
 	}
 
@@ -354,8 +357,23 @@ func (e *Engine) triggerReveal(ctx context.Context, sessionCode string) error {
 		if err := json.Unmarshal([]byte(rawAns), &ans); err != nil {
 			continue
 		}
-		isCorrect := ans.OptionID == correctOptionID
-		points := 0
+		// check if the exact correct options were selected
+		isCorrect := false
+		if len(ans.OptionIDs) == len(correctOptionIDs) {
+            isCorrect = true
+			ansMap := make(map[string]bool)
+			for _, id := range ans.OptionIDs {
+				ansMap[id] = true
+			}
+			for _, correctID := range correctOptionIDs {
+				if !ansMap[correctID] {
+					isCorrect = false
+					break
+				}
+			}
+		}
+
+        points := 0
 		if isCorrect {
 			elapsed := ans.AnsweredAt.Sub(state.QuestionStarted).Seconds()
 			points = CalculatePoints(elapsed, q.TimeLimit)
@@ -366,10 +384,11 @@ func (e *Engine) triggerReveal(ctx context.Context, sessionCode string) error {
 		if err != nil {
 			continue
 		}
-		optionUUID, err := uuid.Parse(ans.OptionID)
-		if err != nil {
-			continue
-		}
+        // We still need to record the answers in the DB, so we'll just loop and insert them
+        // In the interest of keeping the schema the same, we'll insert them individually
+        // Since we only really care about getting points and storing what they picked, the fact
+        // that one question can have multiple game_answers is fine and expected
+
 		questionUUID, err := uuid.Parse(q.ID)
 		if err != nil {
 			continue
@@ -379,16 +398,22 @@ func (e *Engine) triggerReveal(ctx context.Context, sessionCode string) error {
 			continue
 		}
 
-		_, dbErr := e.db.Exec(ctx,
-			`INSERT INTO game_answers (id, session_id, player_id, question_id, option_id, answered_at, is_correct, points)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-			 ON CONFLICT (session_id, player_id, question_id) DO NOTHING`,
-			uuid.New(), sessionUUID, playerUUID, questionUUID, optionUUID,
-			ans.AnsweredAt, isCorrect, points,
-		)
-		if dbErr != nil {
-			log.Printf("engine: insert answer error: %v", dbErr)
-		}
+        for _, selectedOptionID := range ans.OptionIDs {
+			optionUUID, err := uuid.Parse(selectedOptionID)
+			if err != nil {
+				continue
+			}
+			_, dbErr := e.db.Exec(ctx,
+				`INSERT INTO game_answers (id, session_id, player_id, question_id, option_id, answered_at, is_correct, points)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+				ON CONFLICT (session_id, player_id, question_id, option_id) DO NOTHING`,
+				uuid.New(), sessionUUID, playerUUID, questionUUID, optionUUID,
+				ans.AnsweredAt, isCorrect, points,
+			)
+			if dbErr != nil {
+				log.Printf("engine: insert answer error: %v", dbErr)
+			}
+        }
 
 		if points > 0 {
 			_, _ = e.db.Exec(ctx,
@@ -413,8 +438,8 @@ func (e *Engine) triggerReveal(ctx context.Context, sessionCode string) error {
 	e.hub.Broadcast(sessionCode, hub.Message{
 		Type: hub.MsgAnswerReveal,
 		Payload: map[string]any{
-			"correct_option_id": correctOptionID,
-			"scores":            scores,
+			"correct_option_ids": correctOptionIDs,
+			"scores":             scores,
 		},
 	})
 
@@ -546,7 +571,7 @@ func (e *Engine) getLeaderboard(ctx context.Context, sessionID string) ([]models
 // loadQuestions fetches questions with options from DB.
 func (e *Engine) loadQuestions(ctx context.Context, quizID string) ([]storedQuestion, error) {
 	rows, err := e.db.Query(ctx,
-		`SELECT id, text, time_limit, "order" FROM questions WHERE quiz_id = $1 ORDER BY "order" ASC`,
+		`SELECT id, text, time_limit, "order", randomize_options, allow_multiple_answers FROM questions WHERE quiz_id = $1 ORDER BY "order" ASC`,
 		quizID,
 	)
 	if err != nil {
@@ -557,7 +582,7 @@ func (e *Engine) loadQuestions(ctx context.Context, quizID string) ([]storedQues
 	var questions []storedQuestion
 	for rows.Next() {
 		var q storedQuestion
-		if err := rows.Scan(&q.ID, &q.Text, &q.TimeLimit, &q.Order); err != nil {
+		if err := rows.Scan(&q.ID, &q.Text, &q.TimeLimit, &q.Order, &q.RandomizeOptions, &q.AllowMultipleAnswers); err != nil {
 			return nil, err
 		}
 		questions = append(questions, q)
@@ -580,6 +605,18 @@ func (e *Engine) loadQuestions(ctx context.Context, quizID string) ([]storedQues
 			questions[i].Options = append(questions[i].Options, opt)
 		}
 		optRows.Close()
+
+		if questions[i].RandomizeOptions {
+            // shuffle the options locally to fix the array order for this game session
+			opts := questions[i].Options
+			for j := len(opts) - 1; j > 0; j-- {
+				// use math/rand for this non-crypto shufflling
+                // we'll lazily generate n inside loop as rand.Intn doesn't return errs
+                num, _ := crypto_rand.Int(crypto_rand.Reader, big.NewInt(int64(j+1)))
+				k := int(num.Int64())
+				opts[j], opts[k] = opts[k], opts[j]
+			}
+		}
 	}
 	return questions, nil
 }
@@ -627,10 +664,11 @@ func buildQuestionPayload(q storedQuestion, idx, total int) map[string]any {
 		"question_index":  idx,
 		"total_questions": total,
 		"question": map[string]any{
-			"id":         q.ID,
-			"text":       q.Text,
-			"time_limit": q.TimeLimit,
-			"options":    opts,
+			"id":                     q.ID,
+			"text":                   q.Text,
+			"time_limit":             q.TimeLimit,
+			"allow_multiple_answers": q.AllowMultipleAnswers,
+			"options":                opts,
 		},
 	}
 }
@@ -649,10 +687,11 @@ func BuildHostQuestionPayload(q storedQuestion, idx, total int) map[string]any {
 		"question_index":  idx,
 		"total_questions": total,
 		"question": map[string]any{
-			"id":         q.ID,
-			"text":       q.Text,
-			"time_limit": q.TimeLimit,
-			"options":    opts,
+			"id":                     q.ID,
+			"text":                   q.Text,
+			"time_limit":             q.TimeLimit,
+			"allow_multiple_answers": q.AllowMultipleAnswers,
+			"options":                opts,
 		},
 	}
 }

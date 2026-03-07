@@ -189,11 +189,23 @@ func handleMessage(h *Handler, client *hub.Client, sessionCode string, isHost bo
 			return
 		}
 		questionID, _ := payload["question_id"].(string)
-		optionID, _ := payload["option_id"].(string)
-		if questionID == "" || optionID == "" {
+        optionID, _ := payload["option_id"].(string)
+        
+        var optionIDs []string
+        if optIDsRaw, ok := payload["option_ids"].([]any); ok {
+            for _, val := range optIDsRaw {
+                if strVal, ok := val.(string); ok {
+                    optionIDs = append(optionIDs, strVal)
+                }
+            }
+        } else if optionID != "" {
+            optionIDs = append(optionIDs, optionID)
+        }
+
+		if questionID == "" || len(optionIDs) == 0 {
 			return
 		}
-		if err := h.engine.SubmitAnswer(ctx, sessionCode, client.ID, questionID, optionID); err != nil {
+		if err := h.engine.SubmitAnswer(ctx, sessionCode, client.ID, questionID, optionIDs); err != nil {
 			log.Printf("engine.SubmitAnswer error: %v", err)
 		}
 
