@@ -161,7 +161,7 @@ export function PlayerGamePage() {
         <button
           onClick={() => navigate("/join")}
           className="w-full py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest transition-all"
-          style={{ background: "#ff6b35" }}
+          style={{ background: "#0136fe" }}
         >
           Retour à l'accueil
         </button>

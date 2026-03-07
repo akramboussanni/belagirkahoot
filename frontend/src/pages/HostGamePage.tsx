@@ -9,7 +9,6 @@ import { endSession } from "../api/sessions";
 import { LeaderboardDisplay } from "../components/LeaderboardDisplay";
 import { PodiumScreen } from "../components/PodiumScreen";
 import { ConfirmModal } from "../components/ConfirmModal";
-import { PrayerArcTransition } from "../components/PrayerArcTransition";
 import type { WsMessage, LeaderboardEntry, PodiumEntry } from "../types";
 import { GameBackground } from "../components/GameBackground";
 import { GameHeader } from "../components/GameHeader";
@@ -40,7 +39,7 @@ interface AnswerRevealPayload {
   scores: Record<string, { is_correct: boolean; points: number; total_score: number }>;
 }
 
-type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "arc_transition" | "podium";
+type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "podium";
 
 const OPTION_COLORS = ["#4caf50", "#2196f3", "#ff6b35", "#f44336"];
 const OPTION_LETTERS = ["A", "B", "C", "D"];
@@ -128,7 +127,7 @@ export function HostGamePage() {
     enabled: !!code,
   });
 
-  const handleNextQuestion = () => setPhase("arc_transition");
+  const handleNextQuestion = () => send({ type: "next_question", payload: {} });
   const handleEndGame = () => navigate("/host");
 
   async function handleForceEndGame() {
@@ -185,13 +184,7 @@ export function HostGamePage() {
     return <PodiumScreen entries={podium.slice(0, 3)} onEnd={handleEndGame} endLabel="Retour au tableau de bord" />;
   }
 
-  if (phase === "arc_transition") {
-    return (
-      <PrayerArcTransition
-        onComplete={() => send({ type: "next_question", payload: {} })}
-      />
-    );
-  }
+
 
   if (phase === "leaderboard") {
     const isLastQuestion = !currentQuestion || currentQuestion.question_index + 1 >= currentQuestion.total_questions;
@@ -205,7 +198,7 @@ export function HostGamePage() {
           <motion.button
             onClick={handleNextQuestion}
             className="w-full py-5 rounded-2xl font-black text-xl text-white flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all uppercase tracking-widest"
-            style={{ background: "#ff6b35" }}
+            style={{ background: "#0136fe" }}
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -273,7 +266,7 @@ export function HostGamePage() {
         </GameCard>
 
         {/* Status/Reveal Area */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-4 flex-1">
+        <div className="w-full mt-4 flex-1">
           {/* Answer Options Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
             {currentQuestion.question.options.map((opt, i) => {
@@ -335,7 +328,7 @@ export function HostGamePage() {
             <motion.button
               onClick={handleNextQuestion}
               className="px-8 py-4 rounded-2xl font-black text-white flex items-center gap-2 uppercase tracking-widest hover:scale-105 transition-transform"
-              style={{ background: "#ff6b35" }}>
+              style={{ background: "#0136fe" }}>
               Suite <ChevronRight className="w-5 h-5" strokeWidth={3} />
             </motion.button>
           </GameCard>
