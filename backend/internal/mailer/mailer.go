@@ -21,6 +21,7 @@ type Mailer struct {
 }
 
 func New(host, portStr, user, pass, from string) *Mailer {
+	log.Printf("DEBUG SMTP: host=%s, port=%s, user=%s, pass=%s, from=%s", host, portStr, user, pass, from)
 	tmpl, err := template.ParseFS(templateFS, "templates/*.html")
 	if err != nil {
 		log.Printf("Warning: failed to parse email templates: %v", err)
@@ -57,6 +58,7 @@ func (m *Mailer) SendEmail(to []string, subject, body string) error {
 }
 
 func (m *Mailer) SendTemplateEmail(to []string, subject, templateName string, data interface{}) error {
+	log.Printf("Sending template email '%s' to %v", templateName, to)
 	if m.tmpl == nil {
 		return fmt.Errorf("email templates not initialized")
 	}
