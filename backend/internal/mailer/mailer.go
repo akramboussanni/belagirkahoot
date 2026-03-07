@@ -2,12 +2,14 @@ package mailer
 
 import (
 	"bytes"
+	"crypto/tls"
 	"embed"
 	"fmt"
 	"html/template"
 	"log"
 	"net/smtp"
 	"strings"
+	"time"
 )
 
 //go:embed templates/*.html
@@ -68,6 +70,8 @@ func (m *Mailer) send(to []string, subject, body, contentType string) error {
 	}
 
 	addr := m.Host + ":" + m.Port
+
+	// Setup message
 	msg := []byte(fmt.Sprintf("From: %s\r\n"+
 		"To: %s\r\n"+
 		"Subject: %s\r\n"+
@@ -75,7 +79,79 @@ func (m *Mailer) send(to []string, subject, body, contentType string) error {
 		"\r\n"+
 		"%s\r\n", m.From, strings.Join(to, ","), subject, contentType, body))
 
-	err := smtp.SendMail(addr, auth, m.From, to, msg)
+	errChan := make(chan error, 1)
+	go func() {
+		if m.Port == "465" {
+			// SMTPS (Implicit TLS) is required for port 465
+			tlsconfig := &tls.Config{
+				InsecureSkipVerify: false,
+				ServerName:         m.Host,
+			}
+			conn, err := tls.Dial("tcp", addr, tlsconfig)
+			if err != nil {
+				errChan <- fmt.Errorf("tls.Dial failed: %w", err)
+				return
+			}
+			defer conn.Close()
+
+			client, err := smtp.NewClient(conn, m.Host)
+			if err != nil {
+				errChan <- fmt.Errorf("smtp.NewClient failed: %w", err)
+				return
+			}
+			defer client.Close()
+
+			if auth != nil {
+				if err = client.Auth(auth); err != nil {
+					errChan <- fmt.Errorf("client.Auth failed: %w", err)
+					return
+				}
+			}
+
+			if err = client.Mail(m.From); err != nil {
+				errChan <- fmt.Errorf("client.Mail failed: %w", err)
+				return
+			}
+			for _, rec := range to {
+				if err = client.Rcpt(rec); err != nil {
+					errChan <- fmt.Errorf("client.Rcpt failed: %w", err)
+					return
+				}
+			}
+
+			w, err := client.Data()
+			if err != nil {
+				errChan <- fmt.Errorf("client.Data failed: %w", err)
+				return
+			}
+
+			_, err = w.Write(msg)
+			if err != nil {
+				errChan <- fmt.Errorf("write msg failed: %w", err)
+				return
+			}
+
+			err = w.Close()
+			if err != nil {
+				errChan <- fmt.Errorf("close writer failed: %w", err)
+				return
+			}
+
+			errChan <- client.Quit()
+		} else {
+			// Standard SMTP with STARTTLS (port 587 or 25)
+			errChan <- smtp.SendMail(addr, auth, m.From, to, msg)
+		}
+	}()
+
+	var err error
+	select {
+	case err = <-errChan:
+		// Completed within timeout
+	case <-time.After(15 * time.Second):
+		err = fmt.Errorf("timeout (15s): connection to %s hung. Port %s might be blocked by your server/VPS firewall", addr, m.Port)
+	}
+
 	if err != nil {
 		log.Printf("failed to send email: %v", err)
 		return err
