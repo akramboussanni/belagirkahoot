@@ -103,7 +103,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 		err := h.mailer.SendTemplateEmail([]string{host.Email}, subject, "welcome.html", data)
 		if err != nil {
-			log.Printf("ERROR: Failed to send verification email to %s: %v", host.Email, err)
+			log.Printf("ERROR: Failed to send verification email to %s. Error: %v, Details: %#v", host.Email, err, err)
 		} else {
 			log.Printf("SUCCESS: Dispatched verification email to %s", host.Email)
 		}

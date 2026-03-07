@@ -49,7 +49,7 @@ func (m *Mailer) SendEmail(to []string, subject, body string) error {
 	msg.SetBody("text/plain", body)
 
 	if err := m.dialer.DialAndSend(msg); err != nil {
-		log.Printf("failed to send plain email: %v", err)
+		log.Printf("failed to send plain email. Error: %v, Details: %#v", err, err)
 		return err
 	}
 
@@ -75,7 +75,7 @@ func (m *Mailer) SendTemplateEmail(to []string, subject, templateName string, da
 	msg.SetBody("text/html", body.String())
 
 	if err := m.dialer.DialAndSend(msg); err != nil {
-		log.Printf("failed to send template email: %v", err)
+		log.Printf("failed to send template email. Error: %v, Details: %#v", err, err)
 		return err
 	}
 
