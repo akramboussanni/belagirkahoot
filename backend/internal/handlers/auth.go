@@ -12,6 +12,9 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 
+	"fmt"
+	"math/rand"
+
 	"github.com/HassanA01/Hilal/backend/internal/models"
 )
 
@@ -59,16 +62,20 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	verToken := generateRandomString(32)
+
 	host := models.Host{
-		ID:           uuid.New(),
-		Email:        req.Email,
-		PasswordHash: string(hash),
-		CreatedAt:    time.Now(),
+		ID:                uuid.New(),
+		Email:             req.Email,
+		PasswordHash:      string(hash),
+		IsVerified:        false,
+		VerificationToken: &verToken,
+		CreatedAt:         time.Now(),
 	}
 
 	_, err = h.db.Exec(r.Context(),
-		`INSERT INTO hosts (id, email, password_hash, created_at) VALUES ($1, $2, $3, $4)`,
-		host.ID, host.Email, host.PasswordHash, host.CreatedAt,
+		`INSERT INTO hosts (id, email, password_hash, is_verified, verification_token, created_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+		host.ID, host.Email, host.PasswordHash, host.IsVerified, host.VerificationToken, host.CreatedAt,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -80,13 +87,24 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.generateToken(host.ID.String())
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to generate token")
-		return
-	}
+	// Send welcome email asynchronously
+	go func() {
+		subject := fmt.Sprintf("Welcome to %s - Verify your email", h.config.AppName)
+		data := struct {
+			AppName         string
+			VerificationURL string
+			Year            int
+		}{
+			AppName:         h.config.AppName,
+			VerificationURL: fmt.Sprintf("%s/verify-email?token=%s", h.config.FrontendURL, verToken),
+			Year:            time.Now().Year(),
+		}
+		_ = h.mailer.SendTemplateEmail([]string{host.Email}, subject, "welcome.html", data)
+	}()
 
-	writeJSON(w, http.StatusCreated, authResponse{Token: token, Host: host})
+	writeJSON(w, http.StatusCreated, map[string]string{
+		"message": "Compte créé avec succès. Veuillez vérifier votre boîte mail (et le dossier spam) pour activer votre compte.",
+	})
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -102,10 +120,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var host models.Host
 	err := h.db.QueryRow(r.Context(),
-		`SELECT id, email, password_hash, created_at FROM hosts WHERE email = $1`, req.Email,
-	).Scan(&host.ID, &host.Email, &host.PasswordHash, &host.CreatedAt)
+		`SELECT id, email, password_hash, is_verified, created_at FROM hosts WHERE email = $1`, req.Email,
+	).Scan(&host.ID, &host.Email, &host.PasswordHash, &host.IsVerified, &host.CreatedAt)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+
+	if !host.IsVerified {
+		writeError(w, http.StatusForbidden, "Please verify your email address before logging in")
 		return
 	}
 
@@ -131,4 +154,14 @@ func (h *Handler) generateToken(hostID string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(h.config.JWTSecret))
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func generateRandomString(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

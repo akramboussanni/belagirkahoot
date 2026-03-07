@@ -18,6 +18,12 @@ type Config struct {
 	AnthropicAPIKey    string
 	GeminiAPIKey       string
 	AIRateLimitPerHour int
+	SMTPHost           string
+	SMTPPort           string
+	SMTPUser           string
+	SMTPPass           string
+	SMTPFrom           string
+	AppName            string
 }
 
 func Load() *Config {
@@ -47,6 +53,12 @@ func Load() *Config {
 		AnthropicAPIKey:    anthropicKey,
 		GeminiAPIKey:       geminiKey,
 		AIRateLimitPerHour: aiRateLimit,
+		SMTPHost:           getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:           getEnv("SMTP_PORT", "587"),
+		SMTPUser:           getEnv("SMTP_USER", ""),
+		SMTPPass:           getEnv("SMTP_PASS", ""),
+		SMTPFrom:           getEnv("SMTP_FROM", "noreply@hilal.app"),
+		AppName:            getEnv("VITE_APP_NAME", "Belagir Kahoot"),
 	}
 }
 

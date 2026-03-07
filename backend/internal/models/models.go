@@ -9,10 +9,14 @@ import (
 // Host / user
 
 type Host struct {
-	ID           uuid.UUID `json:"id" db:"id"`
-	Email        string    `json:"email" db:"email"`
-	PasswordHash string    `json:"-" db:"password_hash"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	ID                  uuid.UUID  `json:"id" db:"id"`
+	Email               string     `json:"email" db:"email"`
+	PasswordHash        string     `json:"-" db:"password_hash"`
+	IsVerified          bool       `json:"is_verified" db:"is_verified"`
+	VerificationToken   *string    `json:"-" db:"verification_token"`
+	ResetToken          *string    `json:"-" db:"reset_token"`
+	ResetTokenExpiresAt *time.Time `json:"-" db:"reset_token_expires_at"`
+	CreatedAt           time.Time  `json:"created_at" db:"created_at"`
 }
 
 // Quiz

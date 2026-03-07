@@ -15,6 +15,7 @@ import (
 	"github.com/HassanA01/Hilal/backend/internal/config"
 	"github.com/HassanA01/Hilal/backend/internal/game"
 	"github.com/HassanA01/Hilal/backend/internal/hub"
+	"github.com/HassanA01/Hilal/backend/internal/mailer"
 )
 
 type Handler struct {
@@ -25,6 +26,7 @@ type Handler struct {
 	config          *config.Config
 	anthropicClient *anthropic.Client
 	geminiClient    *genai.Client
+	mailer          *mailer.Mailer
 }
 
 func New(db *pgxpool.Pool, redisClient *redis.Client, gameHub *hub.Hub, cfg *config.Config) *Handler {
@@ -53,6 +55,7 @@ func New(db *pgxpool.Pool, redisClient *redis.Client, gameHub *hub.Hub, cfg *con
 		config:          cfg,
 		anthropicClient: ac,
 		geminiClient:    gc,
+		mailer:          mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass, cfg.SMTPFrom),
 	}
 }
 
@@ -61,6 +64,9 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 		// Auth
 		r.Post("/auth/register", h.Register)
 		r.Post("/auth/login", h.Login)
+		r.Post("/auth/verify-email", h.VerifyEmail)
+		r.Post("/auth/forgot-password", h.ForgotPassword)
+		r.Post("/auth/reset-password", h.ResetPassword)
 
 		// Quiz management (host only)
 		r.Group(func(r chi.Router) {

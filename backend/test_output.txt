@@ -1,0 +1,6 @@
+﻿--- FAIL: TestCheckRateLimit_ExceedsLimit (0.01s)
+    ai_test.go:226: 4th request should be rate limited
+    ai_test.go:229: expected positive retryAfter, got 0
+FAIL
+FAIL	github.com/HassanA01/Hilal/backend/internal/handlers	0.166s
+FAIL

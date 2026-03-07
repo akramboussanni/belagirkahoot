@@ -1,18 +1,15 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 
 import { register } from "../api/auth";
-import { useAuthStore } from "../stores/authStore";
 
 export function RegisterPage() {
-  const navigate = useNavigate();
-  const setAuth = useAuthStore((s) => s.setAuth);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -30,9 +27,8 @@ export function RegisterPage() {
 
     setLoading(true);
     try {
-      const { token, host } = await register(email, password);
-      setAuth(token, host);
-      navigate("/host", { replace: true });
+      const { message } = await register(email, password);
+      setSuccess(message);
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
@@ -82,7 +78,7 @@ export function RegisterPage() {
           }}
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
 
-          {error && (
+          {error && !success && (
             <motion.div
               className="text-sm rounded-xl px-4 py-3"
               style={{ background: "rgba(244,67,54,0.1)", border: "1px solid rgba(244,67,54,0.3)", color: "#f44336" }}
@@ -91,82 +87,100 @@ export function RegisterPage() {
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
-                Email
-              </label>
-              <input
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                placeholder="hôte@exemple.com"
-              />
-            </div>
+          {success ? (
+            <motion.div
+              className="text-center space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+              <div className="text-xl font-bold" style={{ color: "#0136fe" }}>🎉 Compte créé !</div>
+              <p className="text-sm text-gray-700 whitespace-pre-line">{success}</p>
+              <Link to="/login" className="block w-full py-3 mt-4 rounded-xl font-bold text-sm text-[#0136fe] text-center"
+                style={{
+                  background: "linear-gradient(135deg, #abed00 0%, #b7f700 100%)",
+                  boxShadow: "0 8px 25px rgba(183,247,0,0.35)",
+                }}>
+                Aller à la page de connexion
+              </Link>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
+                  placeholder="hôte@exemple.com"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
-                Mot de passe <span className="font-normal" style={{ color: "rgba(255,255,255,0.35)" }}>(min. 8 caractères)</span>
-              </label>
-              <input
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                placeholder="••••••••"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
+                  Mot de passe <span className="font-normal" style={{ color: "rgba(255,255,255,0.35)" }}>(min. 8 caractères)</span>
+                </label>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
+                  placeholder="••••••••"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
-                Confirmer le mot de passe
-              </label>
-              <input
-                type="password"
-                autoComplete="new-password"
-                required
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
-                placeholder="••••••••"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(1,54,254,0.8)" }}>
+                  Confirmer le mot de passe
+                </label>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-sm text-[#0136fe] outline-none transition"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(1,54,254,0.2)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.6)")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(1,54,254,0.2)")}
+                  placeholder="••••••••"
+                />
+              </div>
 
-            <motion.button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-[#0136fe]"
-              style={{
-                background: loading ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
-                boxShadow: loading ? "none" : "0 8px 25px rgba(255,107,53,0.35)",
-              }}
-              whileHover={!loading ? { scale: 1.02 } : {}}
-              whileTap={!loading ? { scale: 0.98 } : {}}>
-              {loading ? "Création du compte…" : "Créer un compte"}
-            </motion.button>
-          </form>
+              <motion.button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-bold text-sm disabled:cursor-not-allowed text-[#0136fe]"
+                style={{
+                  background: loading ? "rgba(255,107,53,0.4)" : "linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%)",
+                  boxShadow: loading ? "none" : "0 8px 25px rgba(255,107,53,0.35)",
+                }}
+                whileHover={!loading ? { scale: 1.02 } : {}}
+                whileTap={!loading ? { scale: 0.98 } : {}}>
+                {loading ? "Création du compte…" : "Créer un compte"}
+              </motion.button>
+            </form>
+          )}
 
-          <p className="text-center text-sm pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Déjà un compte ?{" "}
-            <Link to="/login" className="font-semibold transition" style={{ color: "#0136fe" }}>
-              Se connecter
-            </Link>
-          </p>
+          {!success && (
+            <p className="text-center text-sm pt-1" style={{ color: "rgba(1,54,254,0.6)" }}>
+              Déjà un compte ?{" "}
+              <Link to="/login" className="font-semibold transition" style={{ color: "#0136fe" }}>
+                Se connecter
+              </Link>
+            </p>
+          )}
         </motion.div>
       </div>
     </div>

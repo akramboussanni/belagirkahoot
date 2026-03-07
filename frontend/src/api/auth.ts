@@ -6,8 +6,12 @@ export interface AuthResponse {
   host: Host;
 }
 
-export async function register(email: string, password: string): Promise<AuthResponse> {
-  const { data } = await apiClient.post<AuthResponse>("/auth/register", { email, password });
+export interface RegisterResponse {
+  message: string;
+}
+
+export async function register(email: string, password: string): Promise<RegisterResponse> {
+  const { data } = await apiClient.post<RegisterResponse>("/auth/register", { email, password });
   return data;
 }
 
