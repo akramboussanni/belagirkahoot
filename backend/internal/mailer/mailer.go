@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"mime"
+	"net"
 	"net/smtp"
 	"strings"
 	"time"
@@ -71,90 +73,93 @@ func (m *Mailer) send(to []string, subject, body, contentType string) error {
 
 	addr := m.Host + ":" + m.Port
 
-	// Setup message
-	msg := []byte(fmt.Sprintf("From: %s\r\n"+
-		"To: %s\r\n"+
-		"Subject: %s\r\n"+
-		"Content-Type: %s\r\n"+
-		"\r\n"+
-		"%s\r\n", m.From, strings.Join(to, ","), subject, contentType, body))
+	// Setup proper MIME email headers
+	header := make(map[string]string)
+	header["From"] = m.From
+	header["To"] = strings.Join(to, ", ")
+	header["Subject"] = mime.QEncoding.Encode("utf-8", subject)
+	header["MIME-Version"] = "1.0"
+	header["Content-Type"] = contentType
 
-	errChan := make(chan error, 1)
-	go func() {
-		if m.Port == "465" {
-			// SMTPS (Implicit TLS) is required for port 465
-			tlsconfig := &tls.Config{
-				InsecureSkipVerify: false,
-				ServerName:         m.Host,
-			}
-			conn, err := tls.Dial("tcp", addr, tlsconfig)
-			if err != nil {
-				errChan <- fmt.Errorf("tls.Dial failed: %w", err)
-				return
-			}
-			defer conn.Close()
+	var msgBuf bytes.Buffer
+	for k, v := range header {
+		msgBuf.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
+	}
+	msgBuf.WriteString("\r\n")
+	msgBuf.WriteString(body)
 
-			client, err := smtp.NewClient(conn, m.Host)
-			if err != nil {
-				errChan <- fmt.Errorf("smtp.NewClient failed: %w", err)
-				return
-			}
-			defer client.Close()
+	timeout := 15 * time.Second
+	dialer := &net.Dialer{Timeout: timeout}
 
-			if auth != nil {
-				if err = client.Auth(auth); err != nil {
-					errChan <- fmt.Errorf("client.Auth failed: %w", err)
-					return
-				}
-			}
-
-			if err = client.Mail(m.From); err != nil {
-				errChan <- fmt.Errorf("client.Mail failed: %w", err)
-				return
-			}
-			for _, rec := range to {
-				if err = client.Rcpt(rec); err != nil {
-					errChan <- fmt.Errorf("client.Rcpt failed: %w", err)
-					return
-				}
-			}
-
-			w, err := client.Data()
-			if err != nil {
-				errChan <- fmt.Errorf("client.Data failed: %w", err)
-				return
-			}
-
-			_, err = w.Write(msg)
-			if err != nil {
-				errChan <- fmt.Errorf("write msg failed: %w", err)
-				return
-			}
-
-			err = w.Close()
-			if err != nil {
-				errChan <- fmt.Errorf("close writer failed: %w", err)
-				return
-			}
-
-			errChan <- client.Quit()
-		} else {
-			// Standard SMTP with STARTTLS (port 587 or 25)
-			errChan <- smtp.SendMail(addr, auth, m.From, to, msg)
-		}
-	}()
-
+	var conn net.Conn
 	var err error
-	select {
-	case err = <-errChan:
-		// Completed within timeout
-	case <-time.After(15 * time.Second):
-		err = fmt.Errorf("timeout (15s): connection to %s hung. Port %s might be blocked by your server/VPS firewall", addr, m.Port)
+
+	if m.Port == "465" {
+		// SMTPS (Implicit TLS) is required for port 465
+		conn, err = tls.DialWithDialer(dialer, "tcp", addr, &tls.Config{ServerName: m.Host})
+	} else {
+		// Standard connection for ports like 587 or 25
+		conn, err = dialer.Dial("tcp", addr)
 	}
 
 	if err != nil {
-		log.Printf("failed to send email: %v", err)
-		return err
+		return fmt.Errorf("connection failed: %w", err)
+	}
+	defer conn.Close()
+
+	// Enforce the timeout for the entire duration of the connection
+	if err := conn.SetDeadline(time.Now().Add(timeout)); err != nil {
+		return fmt.Errorf("failed to set deadline: %w", err)
+	}
+
+	client, err := smtp.NewClient(conn, m.Host)
+	if err != nil {
+		return fmt.Errorf("smtp client creation failed: %w", err)
+	}
+	defer client.Close()
+
+	// Upgrade connection to TLS if using STARTTLS (usually port 587)
+	if m.Port != "465" {
+		if ok, _ := client.Extension("STARTTLS"); ok {
+			config := &tls.Config{ServerName: m.Host}
+			if err = client.StartTLS(config); err != nil {
+				return fmt.Errorf("STARTTLS failed: %w", err)
+			}
+		}
+	}
+
+	// Authenticate
+	if auth != nil {
+		if err = client.Auth(auth); err != nil {
+			return fmt.Errorf("authentication failed: %w", err)
+		}
+	}
+
+	// Send email transactions
+	if err = client.Mail(m.From); err != nil {
+		return fmt.Errorf("sender address rejected: %w", err)
+	}
+	for _, rec := range to {
+		if err = client.Rcpt(rec); err != nil {
+			return fmt.Errorf("recipient address rejected: %w", rec, err)
+		}
+	}
+
+	w, err := client.Data()
+	if err != nil {
+		return fmt.Errorf("data command failed: %w", err)
+	}
+
+	if _, err = w.Write(msgBuf.Bytes()); err != nil {
+		return fmt.Errorf("writing message failed: %w", err)
+	}
+
+	if err = w.Close(); err != nil {
+		return fmt.Errorf("closing message failed: %w", err)
+	}
+
+	if err = client.Quit(); err != nil {
+		log.Printf("failed to send email gracefully: %v", err)
 	}
 
 	log.Printf("email sent successfully to %v", to)
