@@ -21,7 +21,6 @@ type Mailer struct {
 }
 
 func New(host, portStr, user, pass, from string) *Mailer {
-	log.Printf("DEBUG SMTP: host=%s, port=%s, user=%s, pass=%s, from=%s", host, portStr, user, pass, from)
 	tmpl, err := template.ParseFS(templateFS, "templates/*.html")
 	if err != nil {
 		log.Printf("Warning: failed to parse email templates: %v", err)
@@ -30,6 +29,7 @@ func New(host, portStr, user, pass, from string) *Mailer {
 	port, _ := strconv.Atoi(portStr)
 	if port == 0 {
 		port = 587 // default
+		log.Printf("SMTP port not specified or invalid, using default port 587")
 	}
 
 	dialer := gomail.NewDialer(host, port, user, pass)
