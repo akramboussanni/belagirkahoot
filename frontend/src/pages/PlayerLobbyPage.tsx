@@ -96,11 +96,6 @@ export function PlayerLobbyPage() {
     enabled: !!session && !!playerId && !!code,
   });
 
-  const PLAYER_COLORS = [
-    "#0136fe", "#ff6b35", "#4caf50", "#2196f3", "#f44336",
-    "#9c27b0", "#00bcd4", "#ff9800",
-  ];
-
   if (sessionLoading) {
     return (
       <GameBackground>
@@ -205,18 +200,12 @@ export function PlayerLobbyPage() {
                 {players.map((p, i) => (
                   <motion.div
                     key={p.id}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 flex items-center gap-4 border-2 border-white shadow-sm"
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center gap-3 border-2 border-white shadow-sm"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-sm"
-                      style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}
-                    >
-                      {p.name[0]?.toUpperCase()}
-                    </div>
-                    <p className="font-bold flex-1" style={{ color: "#0136fe" }}>{p.name}</p>
+                    <p className="font-bold text-center" style={{ color: "#0136fe" }}>{p.name}</p>
                     {p.id === playerId && (
                       <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-[#b7f700]" style={{ color: "#0136fe" }}>Moi</span>
                     )}

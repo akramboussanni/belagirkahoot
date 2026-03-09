@@ -5,7 +5,7 @@ interface UseWebSocketOptions {
   url: string;
   onMessage: (msg: WsMessage) => void;
   onOpen?: () => void;
-  onClose?: () => void;
+  onClose?: (event?: CloseEvent) => void;
   onError?: (event: Event) => void;
   enabled?: boolean;
 }
@@ -47,7 +47,7 @@ export function useWebSocket({
     wsRef.current = ws;
 
     ws.onopen = () => onOpenRef.current?.();
-    ws.onclose = () => onCloseRef.current?.();
+    ws.onclose = (event) => onCloseRef.current?.(event);
     ws.onerror = (e) => onErrorRef.current?.(e);
     ws.onmessage = (event) => {
       // writePump may batch multiple messages in one frame (newline-separated).

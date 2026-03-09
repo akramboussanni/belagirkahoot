@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ChevronRight, Check } from "lucide-react";
+import toast from "react-hot-toast";
 
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useGameStore } from "../stores/gameStore";
@@ -9,7 +10,6 @@ import { endSession } from "../api/sessions";
 import { LeaderboardDisplay } from "../components/LeaderboardDisplay";
 import { PodiumScreen } from "../components/PodiumScreen";
 import { ConfirmModal } from "../components/ConfirmModal";
-import { PrayerArcTransition } from "../components/PrayerArcTransition";
 import type { WsMessage, LeaderboardEntry, PodiumEntry } from "../types";
 import { GameBackground } from "../components/GameBackground";
 import { GameHeader } from "../components/GameHeader";
@@ -31,16 +31,17 @@ interface HostQuestionPayload {
     id: string;
     text: string;
     time_limit: number;
+    allow_multiple_answers: boolean;
     options: HostOption[];
   };
 }
 
 interface AnswerRevealPayload {
-  correct_option_id: string;
+  correct_option_ids: string[];
   scores: Record<string, { is_correct: boolean; points: number; total_score: number }>;
 }
 
-type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "arc_transition" | "podium";
+type GamePhase = "waiting" | "question" | "reveal" | "leaderboard" | "podium";
 
 const OPTION_COLORS = ["#4caf50", "#2196f3", "#ff6b35", "#f44336"];
 const OPTION_LETTERS = ["A", "B", "C", "D"];
@@ -82,7 +83,13 @@ export function HostGamePage() {
   const { send } = useWebSocket({
     url: `${WS_BASE}/api/v1/ws/host/${code}`,
     onOpen: () => setWsReady(true),
-    onClose: () => setWsReady(false),
+    onClose: (event) => {
+      setWsReady(false);
+      if (event && event.code && event.code !== 1000 && event.code !== 1001) {
+          toast.error("Session invalide ou terminée");
+          navigate("/host");
+      }
+    },
     onMessage: useCallback((msg: WsMessage) => {
       switch (msg.type) {
         case "question": {
@@ -128,7 +135,7 @@ export function HostGamePage() {
     enabled: !!code,
   });
 
-  const handleNextQuestion = () => setPhase("arc_transition");
+  const handleNextQuestion = () => send({ type: "next_question", payload: {} });
   const handleEndGame = () => navigate("/host");
 
   async function handleForceEndGame() {
@@ -167,9 +174,9 @@ export function HostGamePage() {
 
   if (phase === "waiting") {
     return wrapContent(
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh]">
         <GameBrand />
-        <p className="mt-8 font-black text-2xl uppercase tracking-[0.2em] animate-pulse" style={{ color: "#0136fe" }}>Démarrage en cours…</p>
+        <p className="mt-8 font-black text-2xl uppercase tracking-[0.2em] animate-pulse text-center" style={{ color: "#0136fe" }}>Démarrage en cours…</p>
         <div className="flex items-center justify-center gap-3 mt-4">
           <span className={`w-3 h-3 rounded-full ${wsReady ? "bg-green-400" : "bg-yellow-400"} shadow-lg`} />
           <p className="text-sm font-bold uppercase tracking-widest" style={{ color: wsReady ? "#4caf50" : "#0136fe" }}>
@@ -185,13 +192,7 @@ export function HostGamePage() {
     return <PodiumScreen entries={podium.slice(0, 3)} onEnd={handleEndGame} endLabel="Retour au tableau de bord" />;
   }
 
-  if (phase === "arc_transition") {
-    return (
-      <PrayerArcTransition
-        onComplete={() => send({ type: "next_question", payload: {} })}
-      />
-    );
-  }
+
 
   if (phase === "leaderboard") {
     const isLastQuestion = !currentQuestion || currentQuestion.question_index + 1 >= currentQuestion.total_questions;
@@ -205,7 +206,7 @@ export function HostGamePage() {
           <motion.button
             onClick={handleNextQuestion}
             className="w-full py-5 rounded-2xl font-black text-xl text-white flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all uppercase tracking-widest"
-            style={{ background: "#ff6b35" }}
+            style={{ background: "#0136fe" }}
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -240,8 +241,11 @@ export function HostGamePage() {
             <span className="font-black text-sm uppercase tracking-widest px-3 py-1 rounded bg-[#b7f700] text-[#0136fe]">
               Q{currentQuestion.question_index + 1}
             </span>
-            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest opacity-40 text-[#0136fe]">
-              {currentQuestion.question_index + 1}/{currentQuestion.total_questions}
+            <div className="flex flex-col items-end gap-1 text-sm font-black uppercase tracking-widest opacity-40 text-[#0136fe]">
+              <span>{currentQuestion.question_index + 1}/{currentQuestion.total_questions}</span>
+              {currentQuestion.question.allow_multiple_answers && (
+                <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Plusieurs réponses</span>
+              )}
             </div>
           </div>
 
@@ -273,7 +277,7 @@ export function HostGamePage() {
         </GameCard>
 
         {/* Status/Reveal Area */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-4 flex-1">
+        <div className="w-full mt-4 flex-1">
           {/* Answer Options Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
             {currentQuestion.question.options.map((opt, i) => {
@@ -335,7 +339,7 @@ export function HostGamePage() {
             <motion.button
               onClick={handleNextQuestion}
               className="px-8 py-4 rounded-2xl font-black text-white flex items-center gap-2 uppercase tracking-widest hover:scale-105 transition-transform"
-              style={{ background: "#ff6b35" }}>
+              style={{ background: "#0136fe" }}>
               Suite <ChevronRight className="w-5 h-5" strokeWidth={3} />
             </motion.button>
           </GameCard>

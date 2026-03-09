@@ -1,0 +1,2 @@
+ALTER TABLE questions ADD COLUMN randomize_options BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE questions ADD COLUMN allow_multiple_answers BOOLEAN NOT NULL DEFAULT FALSE;

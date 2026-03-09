@@ -26,7 +26,7 @@ interface RevealScore {
 }
 
 interface AnswerRevealPayload {
-  correct_option_id: string;
+  correct_option_ids: string[];
   scores: Record<string, RevealScore>;
 }
 
@@ -79,7 +79,8 @@ export function PlayerGamePage() {
   const [phase, setPhase] = useState<GamePhase>("waiting");
   const [currentQuestion, setCurrentQuestion] = useState<QuestionPayload | null>(null);
   const [questionStartedAt, setQuestionStartedAt] = useState<number>(0);
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [revealPayload, setRevealPayload] = useState<AnswerRevealPayload | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [prevLeaderboard, setPrevLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -101,7 +102,8 @@ export function PlayerGamePage() {
           const p = msg.payload as QuestionPayload;
           setCurrentQuestion(p);
           setPhase("question");
-          setSelectedOptionId(null);
+          setSelectedOptionIds([]);
+          setIsSubmitted(false);
           setRevealPayload(null);
           setQuestionStartedAt(Date.now());
           break;
@@ -136,10 +138,32 @@ export function PlayerGamePage() {
     enabled: !!code && !!playerId,
   });
 
-  const handleSelectOption = (optionId: string, questionId: string) => {
-    if (selectedOptionId) return;
-    setSelectedOptionId(optionId);
-    send({ type: "answer_submitted", payload: { question_id: questionId, option_id: optionId } });
+  const handleToggleOption = (optionId: string) => {
+    if (isSubmitted) return;
+    
+    const isMultiple = currentQuestion?.question.allow_multiple_answers;
+    if (isMultiple) {
+      setSelectedOptionIds(prev => 
+        prev.includes(optionId) 
+          ? prev.filter(id => id !== optionId) 
+          : [...prev, optionId]
+      );
+    } else {
+      setSelectedOptionIds([optionId]);
+      handleSubmit([optionId]);
+    }
+  };
+
+  const handleSubmit = (ids: string[]) => {
+    if (isSubmitted || ids.length === 0) return;
+    setIsSubmitted(true);
+    send({ 
+      type: "answer_submitted", 
+      payload: { 
+        question_id: currentQuestion?.question.id, 
+        option_ids: ids // Send array to match backend change
+      } 
+    });
   };
 
   const wrapContent = (content: React.ReactNode) => (
@@ -161,7 +185,7 @@ export function PlayerGamePage() {
         <button
           onClick={() => navigate("/join")}
           className="w-full py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest transition-all"
-          style={{ background: "#ff6b35" }}
+          style={{ background: "#0136fe" }}
         >
           Retour à l'accueil
         </button>
@@ -230,8 +254,8 @@ export function PlayerGamePage() {
 
         <div className="space-y-3">
           {opts.map((opt, i) => {
-            const isCorrectOpt = opt.id === revealPayload.correct_option_id;
-            const wasSelected = opt.id === selectedOptionId;
+            const isCorrectOpt = revealPayload.correct_option_ids.includes(opt.id);
+            const wasSelected = selectedOptionIds.includes(opt.id);
             const color = OPTION_COLORS[i % 4];
             return (
               <div key={opt.id} className={`rounded-2xl p-4 flex items-center gap-4 border-4 transition-all ${isCorrectOpt ? "bg-white border-[#b7f700] shadow-lg scale-105" :
@@ -268,7 +292,7 @@ export function PlayerGamePage() {
           <h2 className="text-2xl font-black leading-tight" style={{ color: "#0136fe" }}>{currentQuestion.question.text}</h2>
         </GameCard>
 
-        {selectedOptionId ? (
+        {isSubmitted ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center pt-8">
             <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-4 shadow-xl border-8 border-[#b7f700]">
               <Check className="w-10 h-10" style={{ color: "#0136fe" }} strokeWidth={4} />
@@ -277,22 +301,57 @@ export function PlayerGamePage() {
             <p className="text-sm font-medium opacity-60" style={{ color: "#0136fe" }}>En attente des autres génies...</p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {opts.map((opt, i) => (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              {opts.map((opt, i) => {
+                const isSelected = selectedOptionIds.includes(opt.id);
+                return (
+                  <motion.button
+                    key={opt.id}
+                    onClick={() => handleToggleOption(opt.id)}
+                    className="w-full p-6 rounded-[2rem] flex items-center gap-6 shadow-lg transition-all group relative overflow-hidden"
+                    style={{ 
+                      background: isSelected ? OPTION_COLORS[i % 4] : "white",
+                      border: `4px solid ${OPTION_COLORS[i % 4]}`,
+                    }}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-2xl group-hover:scale-110 transition-transform"
+                      style={{ 
+                        background: isSelected ? "rgba(255,255,255,0.2)" : OPTION_COLORS[i % 4],
+                        color: isSelected ? "white" : "white"
+                      }}
+                    >
+                      {String.fromCharCode(65 + i)}
+                    </div>
+                    <span className={`font-black text-xl text-left leading-tight py-2 ${isSelected ? "text-white" : "text-[#0136fe]"}`}>
+                      {opt.text}
+                    </span>
+                    {isSelected && (
+                      <div className="ml-auto">
+                        <Check className="w-8 h-8 text-white" strokeWidth={4} />
+                      </div>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+            
+            {currentQuestion.question.allow_multiple_answers && (
               <motion.button
-                key={opt.id}
-                onClick={() => handleSelectOption(opt.id, currentQuestion.question.id)}
-                className="w-full p-6 rounded-[2rem] flex items-center gap-6 shadow-lg transition-all group relative overflow-hidden"
-                style={{ background: OPTION_COLORS[i % 4] }}
-                whileHover={{ scale: 1.02, y: -4 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => handleSubmit(selectedOptionIds)}
+                disabled={selectedOptionIds.length === 0}
+                className="w-full py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest transition-all disabled:opacity-50"
+                style={{ background: "#0136fe" }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center font-black text-2xl text-white group-hover:scale-110 transition-transform">
-                  {String.fromCharCode(65 + i)}
-                </div>
-                <span className="font-black text-xl text-white text-left leading-tight py-2">{opt.text}</span>
+                Valider
               </motion.button>
-            ))}
+            )}
           </div>
         )}
       </div>

@@ -19,3 +19,19 @@ export async function login(email: string, password: string): Promise<AuthRespon
   const { data } = await apiClient.post<AuthResponse>("/auth/login", { email, password });
   return data;
 }
+
+export async function verifyEmail(token: string): Promise<{ message: string }> {
+  const { data } = await apiClient.post<{ message: string }>("/auth/verify-email", { token });
+  return data;
+}
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  const { data } = await apiClient.post<{ message: string }>("/auth/forgot-password", { email });
+  return data;
+}
+
+export async function resetPassword(token: string, new_password: string): Promise<{ message: string }> {
+  const { data } = await apiClient.post<{ message: string }>("/auth/reset-password", { token, new_password });
+  return data;
+}
+

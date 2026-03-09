@@ -30,12 +30,14 @@ type Quiz struct {
 }
 
 type Question struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	QuizID    uuid.UUID `json:"quiz_id" db:"quiz_id"`
-	Text      string    `json:"text" db:"text"`
-	TimeLimit int       `json:"time_limit" db:"time_limit"` // seconds
-	Order     int       `json:"order" db:"order"`
-	Options   []Option  `json:"options,omitempty"`
+	ID                   uuid.UUID `json:"id" db:"id"`
+	QuizID               uuid.UUID `json:"quiz_id" db:"quiz_id"`
+	Text                 string    `json:"text" db:"text"`
+	TimeLimit            int       `json:"time_limit" db:"time_limit"` // seconds
+	Order                int       `json:"order" db:"order"`
+	RandomizeOptions     bool      `json:"randomize_options" db:"randomize_options"`
+	AllowMultipleAnswers bool      `json:"allow_multiple_answers" db:"allow_multiple_answers"`
+	Options              []Option  `json:"options,omitempty"`
 }
 
 type Option struct {

@@ -17,6 +17,8 @@ export interface Question {
   text: string;
   time_limit: number;
   order: number;
+  randomize_options?: boolean;
+  allow_multiple_answers?: boolean;
   options: Option[];
 }
 
@@ -95,6 +97,7 @@ export interface QuestionPayload {
     id: string;
     text: string;
     time_limit: number;
+    allow_multiple_answers?: boolean;
     options: Array<{ id: string; text: string }>;
   };
 }
@@ -106,7 +109,7 @@ export interface RevealScoreEntry {
 }
 
 export interface AnswerRevealPayload {
-  correct_option_id: string;
+  correct_option_ids: string[];
   scores: Record<string, RevealScoreEntry>;
 }
 
